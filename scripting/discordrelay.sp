@@ -610,23 +610,23 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
     char id[20];
     chl.GetID(id, sizeof(id));
         
-    if(StrEqual(id, g_sChannelId))
-    {
-        char message[512];
-        char discorduser[32], discriminator[6];
-        discordmessage.GetContent(message, sizeof(message));
-        author.GetUsername(discorduser, sizeof(discorduser));
-        author.GetDiscriminator(discriminator, sizeof(discriminator));
-    
-        CPrintToChatAll("%s[%sDiscord%s] %s%s%s#%s%s%s: %s", 	g_msg_textcol, g_msg_varcol, g_msg_textcol,
-        														g_msg_varcol, discorduser, g_msg_textcol,
-        														g_msg_varcol, discriminator, g_msg_textcol,
-        														message);
-        delete author;
-#if defined DEBUG
-        LogError("Printing message '%s' from '%s#%s' to server chat", message, discorduser, discriminator);
-#endif
-    }
+	if (StrEqual(id, g_sChannelId))
+	{
+		char message[512];
+		char discorduser[32], discriminator[6];
+		discordmessage.GetContent(message, sizeof(message));
+		author.GetUsername(discorduser, sizeof(discorduser));
+		author.GetDiscriminator(discriminator, sizeof(discriminator));
+
+		// Aqui você exibe apenas o nome do usuário do Discord na mensagem
+		CPrintToChatAll("%s[%sDiscord%s] %s%s%s: %s", g_msg_textcol, g_msg_varcol, g_msg_textcol,
+						g_msg_varcol, discorduser, g_msg_textcol,
+						message);
+		delete author;
+	#if defined DEBUG
+		LogError("Printing message '%s' from '%s#%s' to server chat", message, discorduser, discriminator);
+	#endif
+	}
     if(StrEqual(id, g_sRCONChannelId))
     {
         char message[512];
