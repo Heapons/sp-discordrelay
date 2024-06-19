@@ -6,13 +6,16 @@
 #include <sdktools>
 #include <discord>
 #include <multicolors>
+#include <autoexecconfig>
+#include <updater>
 #undef REQUIRE_EXTENSIONS
 #include <ripext>
-#include <autoexecconfig>
+
+#define UPDATE_URL "https://raw.githubusercontent.com/maxijabase/sp-discordrelay/main/updatefile.txt"
 
 public Plugin myinfo = 
 {
-    name = "Discord Relay", 
+    name = "[ANY] Discord Relay", 
     author = "log-ical (ampere version)", 
     description = "Discord and Server interaction", 
     version = "1.0", 
@@ -59,10 +62,10 @@ char g_sRCONChannelId[64];
 ConVar g_cvSBPPAvatar;
 char g_sSBPPAvatar[64];
 
-ConVar g_cvServerToDiscord; // requires Discord bot key
-ConVar g_cvDiscordToServer; // requires Discord webhook
-ConVar g_cvServerToDiscordAvatars; // requires steam api key
-ConVar g_cvRCONDiscordToServer; // requires Discord bot key
+ConVar g_cvServerToDiscord;
+ConVar g_cvDiscordToServer;
+ConVar g_cvServerToDiscordAvatars;
+ConVar g_cvRCONDiscordToServer;
 ConVar g_cvPrintRCONResponse;
 
 ConVar g_cvServerMessage;
@@ -173,6 +176,11 @@ public void OnPluginStart()
     
     g_cvSBPPAvatar.AddChangeHook(OnDiscordRelayCvarChanged);
     
+    if (LibraryExists("updater"))
+    {
+        Updater_AddPlugin(UPDATE_URL);
+    }
+
     if (g_Late)
     {
         for(int i = 1; i <= MaxClients; i++)
@@ -190,6 +198,14 @@ public void OnPluginStart()
     }
 }
 
+public void OnLibraryAdded(const char[] name)
+{
+    if (StrEqual(name, "updater"))
+    {
+        Updater_AddPlugin(UPDATE_URL);
+    }
+}
+
 public Action Timer_CreateBot(Handle timer)
 {
     if (!g_sDiscordBotToken[0])
@@ -200,7 +216,7 @@ public Action Timer_CreateBot(Handle timer)
 
     if (g_dBot)
     {
-        LogMessage("Bot already configured...");
+        LogMessage("Bot already configured, skipping...");
         return Plugin_Handled;
     }
 
@@ -247,12 +263,12 @@ public void OnClientAuthorized(int client)
 
 public void OnMapStart()
 {
-    if (g_sDiscordWebhook[0])
+    if (!g_sDiscordWebhook[0])
     {
         return;
     }
     
-    CreateTimer(4.0, Timer_MapStart, _, TIMER_DATA_HNDL_CLOSE);
+    CreateTimer(4.0, Timer_MapStart);
     if (g_cvDiscordToServer.BoolValue)
     {
         CreateTimer(2.0, Timer_CreateBot);
@@ -610,7 +626,7 @@ public void OnChannelsReceived(DiscordBot bot, const char[] guild, DiscordChanne
 
     if (g_dBot == null || chl == null)
     {
-        LogMessage("Invalid Bot or Channel!");
+        LogError("Invalid Bot or Channel!");
         return;
     }
 
@@ -621,12 +637,16 @@ public void OnChannelsReceived(DiscordBot bot, const char[] guild, DiscordChanne
     
     char id[20];
     chl.GetID(id, sizeof(id));
+    char channelName[64];
+    chl.GetName(channelName, sizeof(channelName));
     if (g_cvDiscordToServer.BoolValue && StrEqual(id, g_sChannelId))
     {
+        LogMessage("Listening to #%s for messages...", channelName);
         g_dBot.StartListeningToChannel(chl, OnDiscordMessageSent);
     }
     if (g_cvRCONDiscordToServer.BoolValue && StrEqual(id, g_sRCONChannelId))
     {
+        LogMessage("Listening to #%s for RCON commands...", channelName);
         g_dBot.StartListeningToChannel(chl, OnDiscordMessageSent);
     }
 }
