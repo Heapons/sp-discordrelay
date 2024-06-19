@@ -4,19 +4,17 @@ Discord ⇄ Server interaction for the Source Engine
 
 # Installation
 
-Place discordrelay.smx inside of `./cstrike/addons/sourcemod/plugins` and update convars in `./cstrike/cfg/sourcemod/discordrelay.cfg` after running the plugin.
+Place discordrelay.smx inside of `/addons/sourcemod/plugins` and update convars in `/cfg/sourcemod/discordrelay.cfg` after running the plugin.
 
 # Dependencies
 
-SteamWorks - https://forums.alliedmods.net/showthread.php?t=229556
+- SteamWorks - https://forums.alliedmods.net/showthread.php?t=229556
+- discord-api - https://github.com/Cruze03/sourcemod-discord
+- ripext (sourcemod REST api) - https://forums.alliedmods.net/showthread.php?t=298024
 
-discord-api - https://github.com/Cruze03/sourcemod-discord
-
-*Note - If you plan to send messages/requests to the server from discord ensure you have Message Intents enabled in the app dashboard. [^1]
+*Note - If you plan to send messages/requests to the server from discord ensure you have Message Intents enabled in the app dashboard.
 ![unknown](https://user-images.githubusercontent.com/42725021/191847732-36a08338-ca11-4ae3-8584-ddc9a308400a.png)
-[^1]:  Thank you ampere. Image provieded by dysphie.
 
-ripext (sourcemod REST api) - https://forums.alliedmods.net/showthread.php?t=298024
 
 # Configuration
 
@@ -60,11 +58,7 @@ Enable to allow client messages in the server to be sent to Discord. This is any
 Hides any message that begins with ! or /, discrelay_message needs to be enabled for this to work.
 
 ### discrelay_msg_textcol & discrelay_msg_varcol
-	("%s[%sDiscord%s] %s%s%s#%s%s%s: %s", 	g_msg_textcol, g_msg_varcol, g_msg_textcol,
-								g_msg_varcol, discorduser, g_msg_textcol,
-								g_msg_varcol, discriminator, g_msg_textcol,
-								message)
-discorduser, discriminator, and message are discord things, but g_msg_textcol and g_msg_varcol refer to the colors used for the message that will be sent to the server when doing discord -> server. The plugin uses morecolors.inc to supply the colors, so when setting the cvar make sure to set it like {red} for example. Depending on the game you are using different options to set the color can be chosen such as using hex (more information here https://forums.alliedmods.net/showthread.php?t=247770). 
+The colors used for the message that will be sent to the server when doing discord -> server. The plugin uses morecolors.inc to supply the colors, so when setting the cvar make sure to set it like {red} for example. Depending on the game you are using different options to set the color can be chosen such as using hex (more information here https://forums.alliedmods.net/showthread.php?t=247770). 
 
 ### discrelay_printsbppbans
 Print bans, if SBPP is installed on the server.
@@ -76,12 +70,12 @@ Print gags, mutes, and silences, if SBPP is installed on the server.
 URL to an image. Used to change the avatar of the SBPP messages.
 
 ### discrelay_rcon_enabled
-Enable RCon functionality.
+Enable RCON functionality.
 
-# Warning to server owners: only let people you trust have access to the RCon channel; all messages sent in this channel is considered to be a command.
+# Warning to server owners: only let people you trust have access to the RCON channel; all messages sent in this channel is considered to be a command.
 ### discrelay_rcon_channelid
-Discord channel ID for where rcon commands should be sent.
+Discord channel ID for where RCON commands should be sent.
 ### discrelay_rcon_printreponse
 Prints server response to the command.
 ### discrelay_rcon_webhook
-Webhook for RCon reponse.
+Webhook for RCON reponse.
