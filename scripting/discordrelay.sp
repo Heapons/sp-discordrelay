@@ -20,7 +20,7 @@ public Plugin myinfo =
     name = "[ANY] Discord Relay", 
     author = "log-ical (ampere version)", 
     description = "Discord and Server interaction", 
-    version = "1.0", 
+    version = "1.1", 
     url = "https://github.com/maxijabase/sp-discordrelay"    
 }
 
