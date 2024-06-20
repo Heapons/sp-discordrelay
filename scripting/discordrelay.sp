@@ -93,8 +93,9 @@ public void OnClientDisconnect(int client)
 
 public void OnMapStart()
 {
-    if (!g_sDiscordWebhook[0])
+    if (!g_sDiscordWebhook[0] || g_Late)
     {
+        g_Late = false;
         return;
     }
     
@@ -111,14 +112,21 @@ public void OnMapEnd()
     if (g_Bot.IsListeningToChannelID(g_sChannelId))
     {
         g_Bot.StopListeningToChannelID(g_sChannelId);
+        PrintToChannel(g_sDiscordWebhook, "Chat relay stopped!", RED);
     }
     
     if (g_Bot.IsListeningToChannelID(g_sRCONChannelId))
     {
         g_Bot.StopListeningToChannelID(g_sRCONChannelId);
+        PrintToChannel(g_sRCONWebhook, "RCON commands relay stopped!", RED);
     }
     
     delete g_Bot;
+}
+
+public void OnPluginEnd()
+{
+    OnMapEnd();
 }
 
 public Action Timer_CreateBot(Handle timer)
@@ -163,7 +171,7 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
         ReplaceString(buffer, sizeof(buffer), "@", "＠");
     }
 
-    PrintToDiscordSay(GetClientUserId(client), buffer);
+    PrintToDiscordSay(client ? GetClientUserId(client) : 0, buffer);
 }
 
 public void SBPP_OnBanPlayer(int admin, int target, int time, const char[] reason)
@@ -334,9 +342,6 @@ public void PrintToDiscord(int userid, int color, const char[] msg, any...)
 
     int client = GetClientOfUserId(userid);
     
-    char name[32];
-    GetClientName(client, name, sizeof(name));
-    
     DiscordWebHook hook = new DiscordWebHook(g_sDiscordWebhook);
     
     if (g_cvServerToDiscordAvatars.BoolValue)
@@ -345,7 +350,7 @@ public void PrintToDiscord(int userid, int color, const char[] msg, any...)
     }
     
     char buffer[128];
-    Format(buffer, sizeof(buffer), "%s", name);
+    Format(buffer, sizeof(buffer), "%N", client);
     hook.SetUsername(buffer);
     
     MessageEmbed Embed = new MessageEmbed();
@@ -377,8 +382,8 @@ public void PrintToDiscordSay(int userid, const char[] msg, any...)
         return;
     }
 
-    int client = GetClientOfUserId(userid);
-    
+    int client = userid ? GetClientOfUserId(userid) : 0;
+    char formattedMessage[256];
     DiscordWebHook hook = new DiscordWebHook(g_sDiscordWebhook);
     
     if (!IsValidClient(client))
@@ -390,27 +395,21 @@ public void PrintToDiscordSay(int userid, const char[] msg, any...)
 
         // If not a valid client, it must be the server
         hook.SetUsername("CONSOLE");
+        Format(formattedMessage, sizeof(formattedMessage), "%s", msg);
     }
     else
     {
-        char name[32];
-        GetClientName(client, name, sizeof(name));
-        
         if (g_cvServerToDiscordAvatars.BoolValue)
         {
             hook.SetAvatar(g_Players[userid].AvatarURL);
         }
 
         char buffer[128];
-        Format(buffer, sizeof(buffer), "%s", name);
+        Format(buffer, sizeof(buffer), "%N", client);
         hook.SetUsername(buffer);
+        Format(formattedMessage, sizeof(formattedMessage), "[`%s`](<http://www.steamcommunity.com/profiles/%s>) : %s", 
+            g_Players[userid].SteamID2, g_Players[userid].SteamID64, msg);
     }
-    
-    char formattedMessage[256];
-    Format(formattedMessage, sizeof(formattedMessage), "[`%s`](<http://www.steamcommunity.com/profiles/%s>) : %s", 
-        g_Players[userid].SteamID2, g_Players[userid].SteamID64, msg);
-
-    // Format(formattedMessage, sizeof(formattedMessage), "`%s` : %s", g_Players[userid].SteamID2, msg);
 
     hook.SetContent(formattedMessage);
     hook.Send();
@@ -436,6 +435,20 @@ public void PrintToDiscordMapChange(const char[] map, int color)
     Embed.AddField("Players Online:", buffer, true);
     
     hook.Embed(Embed);
+    hook.Send();
+    delete hook;
+}
+
+public void PrintToChannel(char[] webhook, const char[] msg, int color)
+{
+    DiscordWebHook hook = new DiscordWebHook(webhook);
+    hook.SetUsername("SourceMod Server Relay");
+
+    MessageEmbed embed = new MessageEmbed();
+    embed.SetColor(color);
+    embed.SetTitle(msg);
+
+    hook.Embed(embed);
     hook.Send();
     delete hook;
 }
@@ -477,11 +490,13 @@ public void OnChannelsReceived(DiscordBot bot, const char[] guild, DiscordChanne
     {
         g_Bot.StartListeningToChannel(chl, OnDiscordMessageSent);
         LogMessage("Listening to #%s for messages...", channelName);
+        PrintToChannel(g_sDiscordWebhook, "Listening to chat messages...", GREEN);
     }
     if (g_cvRCONDiscordToServer.BoolValue && StrEqual(id, g_sRCONChannelId))
     {
         g_Bot.StartListeningToChannel(chl, OnDiscordMessageSent);
         LogMessage("Listening to #%s for RCON commands...", channelName);
+        PrintToChannel(g_sRCONWebhook, "Listening to RCON commands...", GREEN);
     }
 }
 
@@ -504,11 +519,18 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
     {
         char discorduser[32];
         author.GetUsername(discorduser, sizeof(discorduser));
-        CPrintToChatAll("%s[%sDiscord%s] %s%s%s: %s", 
+        
+        char chatMessage[256];
+        Format(chatMessage, sizeof(chatMessage), "%s[%sDiscord%s] %s%s%s: %s", 
             g_msg_textcol, g_msg_varcol, g_msg_textcol, 
             g_msg_varcol, discorduser, g_msg_textcol, 
             message);
 
+        char consoleMessage[256];
+        Format(consoleMessage, sizeof(consoleMessage), "[Discord] %s : %s", discorduser, message);
+
+        CPrintToChatAll(chatMessage);
+        LogMessage(consoleMessage);
         delete author;
     }
     if (StrEqual(id, g_sRCONChannelId))
