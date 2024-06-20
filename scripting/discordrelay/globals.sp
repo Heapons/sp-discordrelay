@@ -1,6 +1,7 @@
-#define GREEN  "#008000"
-#define RED    "#ff2222"
-#define YELLOW "#daa520"
+#define GREEN 32768
+#define RED 16733522
+#define YELLOW 14329120
+#define LIGHT_BLUE 6591981
 
 #define UPDATE_URL "https://raw.githubusercontent.com/maxijabase/sp-discordrelay/main/updatefile.txt"
 

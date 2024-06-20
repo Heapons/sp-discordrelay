@@ -174,12 +174,11 @@ public void SBPP_OnBanPlayer(int admin, int target, int time, const char[] reaso
     }
 
     DiscordWebHook hook = new DiscordWebHook(g_sDiscordWebhook);
-    hook.SlackMode = true;
     hook.SetAvatar(g_sSBPPAvatar);
     hook.SetUsername("Player Banned");
     
     MessageEmbed Embed = new MessageEmbed();
-    Embed.SetColor("#FF0000");
+    Embed.SetColor(RED);
     
     // Banned Player Link Embed
     char bsteamid[65];
@@ -252,7 +251,6 @@ public void SourceComms_OnBlockAdded(int admin, int target, int time, int type, 
     }
 
     DiscordWebHook hook = new DiscordWebHook(g_sDiscordWebhook);
-    hook.SlackMode = true;
     hook.SetAvatar(g_sSBPPAvatar);
     
     char name[32];
@@ -261,7 +259,7 @@ public void SourceComms_OnBlockAdded(int admin, int target, int time, int type, 
     
     MessageEmbed Embed = new MessageEmbed();
     
-    Embed.SetColor("#6495ED");
+    Embed.SetColor(LIGHT_BLUE);
     
     // Blocked Player Link Embed
     char bsteamid[65];
@@ -327,7 +325,7 @@ public void SourceComms_OnBlockAdded(int admin, int target, int time, int type, 
     delete hook;
 }
 
-public void PrintToDiscord(int userid, const char[] color, const char[] msg, any...)
+public void PrintToDiscord(int userid, int color, const char[] msg, any...)
 {
     if (!g_cvServerToDiscord.BoolValue || !g_cvMessage.BoolValue)
     {
@@ -340,7 +338,6 @@ public void PrintToDiscord(int userid, const char[] color, const char[] msg, any
     GetClientName(client, name, sizeof(name));
     
     DiscordWebHook hook = new DiscordWebHook(g_sDiscordWebhook);
-    hook.SlackMode = true;
     
     if (g_cvServerToDiscordAvatars.BoolValue)
     {
@@ -383,7 +380,6 @@ public void PrintToDiscordSay(int userid, const char[] msg, any...)
     int client = GetClientOfUserId(userid);
     
     DiscordWebHook hook = new DiscordWebHook(g_sDiscordWebhook);
-    hook.SlackMode = true;
     
     if (!IsValidClient(client))
     {
@@ -411,17 +407,17 @@ public void PrintToDiscordSay(int userid, const char[] msg, any...)
     }
     
     char formattedMessage[256];
-    // Format(formattedMessage, sizeof(formattedMessage), "[`%s`](\\<http://www.steamcommunity.com/profiles/%s\\>) : %s", 
-    //     g_Players[userid].SteamID2, g_Players[userid].SteamID64, msg);
+    Format(formattedMessage, sizeof(formattedMessage), "[`%s`](<http://www.steamcommunity.com/profiles/%s>) : %s", 
+        g_Players[userid].SteamID2, g_Players[userid].SteamID64, msg);
 
-    Format(formattedMessage, sizeof(formattedMessage), "`%s` : %s", g_Players[userid].SteamID2, msg);
+    // Format(formattedMessage, sizeof(formattedMessage), "`%s` : %s", g_Players[userid].SteamID2, msg);
 
     hook.SetContent(formattedMessage);
     hook.Send();
     delete hook;
 }
 
-public void PrintToDiscordMapChange(const char[] map, const char[] color)
+public void PrintToDiscordMapChange(const char[] map, int color)
 {
     if (!g_cvServerToDiscord.BoolValue || !g_cvMapChangeMessage.BoolValue)
     {
@@ -429,12 +425,10 @@ public void PrintToDiscordMapChange(const char[] map, const char[] color)
     }
 
     DiscordWebHook hook = new DiscordWebHook(g_sDiscordWebhook);
-    hook.SlackMode = true;
     hook.SetUsername("Map Change");
     
     MessageEmbed Embed = new MessageEmbed();
     Embed.SetColor(color);
-    
     Embed.AddField("New Map:", map, true);
     
     char buffer[512];
@@ -526,7 +520,6 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
             Format(response, sizeof(response), "```%s```", response);
             
             DiscordWebHook hook = new DiscordWebHook(g_sRCONWebhook);
-            hook.SlackMode = true;
             hook.SetContent(response);
             hook.SetUsername("RCON");
             hook.Send();
