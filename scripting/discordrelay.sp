@@ -15,12 +15,14 @@
 #include "discordrelay/commbantypes.sp"
 #include "discordrelay/globals.sp"
 
+#define PLUGIN_VERSION "1.2"
+
 public Plugin myinfo = 
 {
     name = "[ANY] Discord Relay", 
     author = "log-ical (ampere version)", 
     description = "Discord and Server interaction", 
-    version = "1.1", 
+    version = PLUGIN_VERSION, 
     url = "https://github.com/maxijabase/sp-discordrelay"    
 }
 
@@ -446,7 +448,10 @@ public void PrintToChannel(char[] webhook, const char[] msg, int color)
 
     MessageEmbed embed = new MessageEmbed();
     embed.SetColor(color);
-    embed.SetTitle(msg);
+
+    char formattedMsg[64];
+    Format(formattedMsg, sizeof(formattedMsg), "Discord Relay v%s - %s", PLUGIN_VERSION, msg);
+    embed.SetTitle(formattedMsg);
 
     hook.Embed(embed);
     hook.Send();

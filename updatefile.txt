@@ -4,12 +4,11 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.1"
+			"Latest"	"1.2"
 		}
 
-		"Notes" "Changes in v1.1:"
-		"Notes" "  - Fixed some console/message user cases."
-		"Notes" "  - Added discord chat/rcon channel notices when beggining or stopping to listen to messages."
+		"Notes" "Changes in v1.2:"
+		"Notes" "  - Add version in Discord channel notices."
 
 	}
 	
