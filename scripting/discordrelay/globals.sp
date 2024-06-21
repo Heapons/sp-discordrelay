@@ -7,6 +7,9 @@
 
 DiscordBot g_Bot;
 Player g_Players[1000];
+bool g_Late;
+bool g_ChatAnnounced;
+bool g_RCONAnnounced;
 
 enum struct Player
 {
@@ -99,5 +102,3 @@ stock void SteamResponse_Callback(HTTPResponse response, int userid)
         PrintToDiscord(userid, GREEN, "connected");
     }
 }
-
-bool g_Late;

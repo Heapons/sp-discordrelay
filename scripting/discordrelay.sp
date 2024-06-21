@@ -15,7 +15,7 @@
 #include "discordrelay/commbantypes.sp"
 #include "discordrelay/globals.sp"
 
-#define PLUGIN_VERSION "1.2"
+#define PLUGIN_VERSION "1.3"
 
 public Plugin myinfo = 
 {
@@ -35,6 +35,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 public void OnPluginStart()
 {
     SetupConvars();
+
+    g_ChatAnnounced = false;
+    g_RCONAnnounced = false;
 
     if (LibraryExists("updater"))
     {
@@ -114,13 +117,11 @@ public void OnMapEnd()
     if (g_Bot.IsListeningToChannelID(g_sChannelId))
     {
         g_Bot.StopListeningToChannelID(g_sChannelId);
-        PrintToChannel(g_sDiscordWebhook, "Chat relay stopped!", RED);
     }
     
     if (g_Bot.IsListeningToChannelID(g_sRCONChannelId))
     {
         g_Bot.StopListeningToChannelID(g_sRCONChannelId);
-        PrintToChannel(g_sRCONWebhook, "RCON commands relay stopped!", RED);
     }
     
     delete g_Bot;
@@ -128,7 +129,15 @@ public void OnMapEnd()
 
 public void OnPluginEnd()
 {
-    OnMapEnd();
+    if (g_ChatAnnounced)
+    {
+        PrintToChannel(g_sRCONWebhook, "RCON commands relay stopped!", RED);
+    }
+
+    if (g_RCONAnnounced)
+    {
+        PrintToChannel(g_sDiscordWebhook, "Chat relay stopped!", RED);
+    }
 }
 
 public Action Timer_CreateBot(Handle timer)
@@ -495,13 +504,21 @@ public void OnChannelsReceived(DiscordBot bot, const char[] guild, DiscordChanne
     {
         g_Bot.StartListeningToChannel(chl, OnDiscordMessageSent);
         LogMessage("Listening to #%s for messages...", channelName);
-        PrintToChannel(g_sDiscordWebhook, "Listening to chat messages...", GREEN);
+        if (!g_ChatAnnounced)
+        {
+            PrintToChannel(g_sDiscordWebhook, "Listening to chat messages...", GREEN);
+            g_ChatAnnounced = true;
+        }
     }
     if (g_cvRCONDiscordToServer.BoolValue && StrEqual(id, g_sRCONChannelId))
     {
         g_Bot.StartListeningToChannel(chl, OnDiscordMessageSent);
         LogMessage("Listening to #%s for RCON commands...", channelName);
-        PrintToChannel(g_sRCONWebhook, "Listening to RCON commands...", GREEN);
+        if (!g_RCONAnnounced)
+        {
+            PrintToChannel(g_sRCONWebhook, "Listening to RCON commands...", GREEN);
+            g_RCONAnnounced = true;
+        }
     }
 }
 
