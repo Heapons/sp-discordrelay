@@ -19,9 +19,6 @@ char g_sChannelId[64];
 ConVar g_cvRCONChannelId;
 char g_sRCONChannelId[64];
 
-ConVar g_cvSBPPAvatar;
-char g_sSBPPAvatar[64];
-
 ConVar g_cvServerToDiscord;
 ConVar g_cvDiscordToServer;
 ConVar g_cvServerToDiscordAvatars;
@@ -34,9 +31,6 @@ ConVar g_cvDisconnectMessage;
 ConVar g_cvMapChangeMessage;
 ConVar g_cvMessage;
 ConVar g_cvHideExclamMessage;
-
-ConVar g_cvPrintSBPPBans;
-ConVar g_cvPrintSBPPComms;
 
 void SetupConvars() 
 {
@@ -71,12 +65,7 @@ void SetupConvars()
     
     // Customization
     g_cvmsg_textcol = AutoExecConfig_CreateConVar("discrelay_msg_textcol", "{default}", "text color of Discord to server text (refer to github for support, the ways you can chose colors depends on game)");
-    g_cvmsg_varcol = AutoExecConfig_CreateConVar("discrelay_msg_varcol", "{default}", "variable color of Discord to server text (refer to github for support, the ways you can chose colors depends on game)");
-    
-    // SBPP Customization
-    g_cvPrintSBPPBans = AutoExecConfig_CreateConVar("discrelay_printsbppbans", "0", "Prints bans to channel that webhook points to, sbpp must be installed for this to function");
-    g_cvPrintSBPPComms = AutoExecConfig_CreateConVar("discrelay_printsbppcomms", "0", "Prints comm bans to channel that webhook pints to, sbpp must be installed for this to function");
-    g_cvSBPPAvatar = AutoExecConfig_CreateConVar("discrelay_sbppavatar", "", "Image url the webhook will use for profile avatar for sourcebans++ functions, leave blank for default Discord avatar");
+    g_cvmsg_varcol = AutoExecConfig_CreateConVar("discrelay_msg_varcol", "{gray}", "variable color of Discord to server text (refer to github for support, the ways you can chose colors depends on game)");
     
     AutoExecConfig_CleanFile();
     AutoExecConfig_ExecuteFile();
@@ -93,7 +82,6 @@ void SetupConvars()
     g_cvmsg_textcol.GetString(g_msg_textcol, sizeof(g_msg_textcol));
     g_cvmsg_varcol.GetString(g_msg_varcol, sizeof(g_msg_varcol));
     
-    g_cvSBPPAvatar.GetString(g_sSBPPAvatar, sizeof(g_sSBPPAvatar));
     
     g_cvSteamApiKey.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvDiscordBotToken.AddChangeHook(OnDiscordRelayCvarChanged);
@@ -106,8 +94,6 @@ void SetupConvars()
     
     g_cvmsg_textcol.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvmsg_varcol.AddChangeHook(OnDiscordRelayCvarChanged);
-    
-    g_cvSBPPAvatar.AddChangeHook(OnDiscordRelayCvarChanged);
 }
 
 public void OnDiscordRelayCvarChanged(ConVar convar, char[] oldValue, char[] newValue)
@@ -121,5 +107,4 @@ public void OnDiscordRelayCvarChanged(ConVar convar, char[] oldValue, char[] new
     g_cvRCONChannelId.GetString(g_sRCONChannelId, sizeof(g_sRCONChannelId));
     g_cvmsg_textcol.GetString(g_msg_textcol, sizeof(g_msg_textcol));
     g_cvmsg_varcol.GetString(g_msg_varcol, sizeof(g_msg_varcol));
-    g_cvSBPPAvatar.GetString(g_sSBPPAvatar, sizeof(g_sSBPPAvatar));
 }

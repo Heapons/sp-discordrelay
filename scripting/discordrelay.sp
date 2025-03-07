@@ -7,23 +7,21 @@
 #include <discord>
 #include <multicolors>
 #include <autoexecconfig>
-#include <updater>
 #undef REQUIRE_EXTENSIONS
 #include <ripext>
 
 #include "discordrelay/convars.sp"
-#include "discordrelay/commbantypes.sp"
 #include "discordrelay/globals.sp"
 
-#define PLUGIN_VERSION "1.3"
+#define PLUGIN_VERSION "1.4"
 
 public Plugin myinfo = 
 {
     name = "[ANY] Discord Relay", 
-    author = "log-ical (ampere version)", 
+    author = "log-ical (ampere version; further edited by Heapons)", 
     description = "Discord and Server interaction", 
     version = PLUGIN_VERSION, 
-    url = "https://github.com/maxijabase/sp-discordrelay"    
+    url = "https://github.com/Heapons/sp-discordrelay"    
 }
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
@@ -38,12 +36,6 @@ public void OnPluginStart()
 
     g_ChatAnnounced = false;
     g_RCONAnnounced = false;
-
-    if (LibraryExists("updater"))
-    {
-        Updater_AddPlugin(UPDATE_URL);
-    }
-
     if (g_Late)
     {
         for(int i = 1; i <= MaxClients; i++)
@@ -58,14 +50,7 @@ public void OnPluginStart()
     if (g_cvDiscordToServer.BoolValue || g_cvRCONDiscordToServer.BoolValue)
     {
         CreateTimer(1.0, Timer_CreateBot);
-    }
-}
-
-public void OnLibraryAdded(const char[] name)
-{
-    if (StrEqual(name, "updater"))
-    {
-        Updater_AddPlugin(UPDATE_URL);
+        CreateTimer(1.0, Timer_ServerStart);
     }
 }
 
@@ -90,6 +75,22 @@ public void OnClientDisconnect(int client)
     if (g_cvDisconnectMessage.BoolValue)
     {
         PrintToDiscord(userid, RED, "disconnected");
+    }
+
+    Player newPlayer;
+    g_Players[userid] = newPlayer;
+}
+
+public Action OnBanClient(int client)
+{
+    if (!IsValidClient(client))
+    {
+        return;
+    }
+    int userid = GetClientUserId(client);
+    if (g_cvDisconnectMessage.BoolValue)
+    {
+        PrintToDiscord(userid, RED, "banned");
     }
 
     Player newPlayer;
@@ -124,7 +125,18 @@ public void OnMapEnd()
         g_Bot.StopListeningToChannelID(g_sRCONChannelId);
     }
     
+    MapEnd();
     delete g_Bot;
+}
+
+public void OnServerEnterHibernation()
+{
+    PrintToChannel(g_sDiscordWebhook, "Server is currently empty!", RED);
+}
+
+public void OnServerExitHibernation()
+{
+    PrintToChannel(g_sDiscordWebhook, "Someone joined the server!", GREEN);
 }
 
 public void OnPluginEnd()
@@ -138,6 +150,8 @@ public void OnPluginEnd()
     {
         PrintToChannel(g_sDiscordWebhook, "Chat relay stopped!", RED);
     }
+
+    OnMapEnd();
 }
 
 public Action Timer_CreateBot(Handle timer)
@@ -159,6 +173,14 @@ public Action Timer_CreateBot(Handle timer)
     return Plugin_Continue;
 }
 
+public Action Timer_ServerStart(Handle timer)
+{
+    char buffer[64];
+    GetCurrentMap(buffer, sizeof(buffer));
+    PrintToDiscordMapChange(buffer, GREEN);
+    return Plugin_Continue;
+}
+
 public Action Timer_MapStart(Handle timer)
 {
     char buffer[64];
@@ -167,9 +189,17 @@ public Action Timer_MapStart(Handle timer)
     return Plugin_Continue;
 }
 
+public Action MapEnd()
+{
+    char buffer[64];
+    GetCurrentMap(buffer, sizeof(buffer));
+    PrintToDiscordPreviousMap(buffer, RED);
+    return Plugin_Continue;
+}
+
 public void OnClientSayCommand_Post(int client, const char[] command, const char[] sArgs)
 {
-    if (g_cvHideExclamMessage.BoolValue && (!strncmp(sArgs, "!", 1) || !strncmp(sArgs, "/", 1)))
+    if (g_cvHideExclamMessage.BoolValue && (!strncmp(sArgs, "/", 1)))
     {
         return;
     }
@@ -183,165 +213,6 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
     }
 
     PrintToDiscordSay(client ? GetClientUserId(client) : 0, buffer);
-}
-
-public void SBPP_OnBanPlayer(int admin, int target, int time, const char[] reason)
-{
-    if (!g_cvPrintSBPPBans.BoolValue)
-    {
-        return;
-    }
-
-    DiscordWebHook hook = new DiscordWebHook(g_sDiscordWebhook);
-    hook.SetAvatar(g_sSBPPAvatar);
-    hook.SetUsername("Player Banned");
-    
-    MessageEmbed Embed = new MessageEmbed();
-    Embed.SetColor(RED);
-    
-    // Banned Player Link Embed
-    char bsteamid[65];
-    char bplayerName[512];
-    if (GetClientAuthId(target, AuthId_SteamID64, bsteamid, sizeof(bsteamid)))
-    {
-        Format(bplayerName, sizeof(bplayerName), "[%N](http://www.steamcommunity.com/profiles/%s)", target, bsteamid);
-    }
-    else
-    {
-        Format(bplayerName, sizeof(bplayerName), "%N", target);
-    }
-    
-    // Admin Link Embed
-    char asteamid[65];
-    char aplayerName[512];
-    if (!IsValidClient(admin))
-    {
-        Format(aplayerName, sizeof(aplayerName), "CONSOLE");
-    }
-    else
-    {
-       if (GetClientAuthId(admin, AuthId_SteamID64, asteamid, sizeof(asteamid)))
-        {
-            Format(aplayerName, sizeof(aplayerName), "[%N](http://www.steamcommunity.com/profiles/%s)", target, asteamid);
-        }
-        else
-        {
-            Format(aplayerName, sizeof(aplayerName), "%N", admin);
-        }
-    }
-    
-    char banMsg[512];
-    Format(banMsg, sizeof(banMsg), "%s has been banned by %s", bplayerName, aplayerName);
-    Embed.AddField("", banMsg, false);
-    
-    Embed.AddField("Reason: ", reason, true);
-    char sTime[16];
-    IntToString(time, sTime, sizeof(sTime));
-    Embed.AddField("Length: ", sTime, true);
-    
-    char CurrentMap[64];
-    GetCurrentMap(CurrentMap, sizeof(CurrentMap));
-    Embed.AddField("Map: ", CurrentMap, true);
-    char sRealTime[32];
-    FormatTime(sRealTime, sizeof(sRealTime), "%m-%d-%Y %I:%M:%S", GetTime());
-    Embed.AddField("Time: ", sRealTime, true);
-    
-    char hostname[64];
-    FindConVar("hostname").GetString(hostname, sizeof(hostname));
-    Embed.SetFooter(hostname);
-
-    if (g_sSBPPAvatar[0] != '\0')
-    {
-        Embed.SetFooterIcon(g_sSBPPAvatar);
-    }
-    
-    Embed.SetTitle("SourceBans");
-    
-    hook.Embed(Embed);
-    hook.Send();
-    delete hook;
-}
-
-public void SourceComms_OnBlockAdded(int admin, int target, int time, int type, char[] reason)
-{
-    if (!g_cvPrintSBPPComms.BoolValue || type > 3)
-    {
-        return;
-    }
-
-    DiscordWebHook hook = new DiscordWebHook(g_sDiscordWebhook);
-    hook.SetAvatar(g_sSBPPAvatar);
-    
-    char name[32];
-    Format(name, sizeof(name), "Player %s", CommbanTypes[type]);
-    hook.SetUsername(name);
-    
-    MessageEmbed Embed = new MessageEmbed();
-    
-    Embed.SetColor(LIGHT_BLUE);
-    
-    // Blocked Player Link Embed
-    char bsteamid[65];
-    char bplayerName[512];
-    if (GetClientAuthId(target, AuthId_SteamID64, bsteamid, sizeof(bsteamid)))
-    {
-        Format(bplayerName, sizeof(bplayerName), "[%N](http://www.steamcommunity.com/profiles/%s)", target, bsteamid);
-    }
-    else
-    {
-        Format(bplayerName, sizeof(bplayerName), "%N", target);
-    }
-    
-    // Admin Link Embed
-    char asteamid[65];
-    char aplayerName[512];
-    if (!IsValidClient(admin))
-    {
-        Format(aplayerName, sizeof(aplayerName), "CONSOLE");
-    }
-    else
-    {
-        if (GetClientAuthId(admin, AuthId_SteamID64, asteamid, sizeof(asteamid)))
-        {
-            Format(aplayerName, sizeof(aplayerName), "[%N](http://www.steamcommunity.com/profiles/%s)", admin, asteamid);
-        }
-        else
-        {
-            Format(aplayerName, sizeof(aplayerName), "%N", admin);
-        }
-    }
-    
-    char banMsg[512];
-    Format(banMsg, sizeof(banMsg), "%s has been %s by %s", bplayerName, lCommbanTypes[type], aplayerName);
-    Embed.AddField("", banMsg, false);
-    
-    Embed.AddField("Reason: ", reason, true);
-    char sTime[16];
-    IntToString(time, sTime, sizeof(sTime));
-    Embed.AddField("Length: ", sTime, true);
-    
-    Embed.AddField("Type: ", sCommbanTypes[type], true);
-    char CurrentMap[64];
-    GetCurrentMap(CurrentMap, sizeof(CurrentMap));
-    Embed.AddField("Map: ", CurrentMap, true);
-    char sRealTime[32];
-    FormatTime(sRealTime, sizeof(sRealTime), "%m-%d-%Y %I:%M:%S", GetTime());
-    Embed.AddField("Time: ", sRealTime, true);
-    
-    char hostname[64];
-    FindConVar("hostname").GetString(hostname, sizeof(hostname));
-    Embed.SetFooter(hostname);
-
-    if (g_sSBPPAvatar[0] != '\0')
-    {
-        Embed.SetFooterIcon(g_sSBPPAvatar);
-    }
-    
-    Embed.SetTitle("SourceComms");
-    
-    hook.Embed(Embed);
-    hook.Send();
-    delete hook;
 }
 
 public void PrintToDiscord(int userid, int color, const char[] msg, any...)
@@ -418,8 +289,7 @@ public void PrintToDiscordSay(int userid, const char[] msg, any...)
         char buffer[128];
         Format(buffer, sizeof(buffer), "%N", client);
         hook.SetUsername(buffer);
-        Format(formattedMessage, sizeof(formattedMessage), "[`%s`](<http://www.steamcommunity.com/profiles/%s>) : %s", 
-            g_Players[userid].SteamID2, g_Players[userid].SteamID64, msg);
+        Format(formattedMessage, sizeof(formattedMessage), "%s", msg);
     }
 
     hook.SetContent(formattedMessage);
@@ -435,15 +305,56 @@ public void PrintToDiscordMapChange(const char[] map, int color)
     }
 
     DiscordWebHook hook = new DiscordWebHook(g_sDiscordWebhook);
-    hook.SetUsername("Map Change");
+    hook.SetUsername("Server Status");
     
     MessageEmbed Embed = new MessageEmbed();
     Embed.SetColor(color);
-    Embed.AddField("New Map:", map, true);
+
+    char hostname[512];
+    Format(hostname, sizeof(hostname), "[%s](https://discord.com/channels/292703237755240448/1270955491014475837/1276484723417419901)", hostname);
+    FindConVar("hostname").GetString(hostname, sizeof(hostname));
+    Embed.AddField("Name:", hostname, false);
+
+    char sv_tags[128];
+    FindConVar("sv_tags").GetString(sv_tags, sizeof(sv_tags));
+    Format(sv_tags, sizeof(sv_tags), "-# `%s`", sv_tags);
+    Embed.AddField("Tags:", sv_tags, false);
+    
+    Embed.AddField("Current Map:", map, true);
     
     char buffer[512];
     Format(buffer, sizeof(buffer), "%d/%d", GetOnlinePlayers(), GetMaxHumanPlayers());
-    Embed.AddField("Players Online:", buffer, true);
+    Embed.AddField("Player Count:", buffer, true);
+    
+    hook.Embed(Embed);
+    hook.Send();
+    delete hook;
+}
+
+public void PrintToDiscordPreviousMap(const char[] map, int color)
+{
+    if (!g_cvServerToDiscord.BoolValue || !g_cvMapChangeMessage.BoolValue)
+    {
+        return;
+    }
+
+    DiscordWebHook hook = new DiscordWebHook(g_sDiscordWebhook);
+    hook.SetUsername("Server Status");
+    
+    MessageEmbed Embed = new MessageEmbed();
+    Embed.SetColor(color);
+
+    char hostname[512];
+    Format(hostname, sizeof(hostname), "[%s](https://discord.com/channels/292703237755240448/1270955491014475837/1276484723417419901)", hostname);
+    FindConVar("hostname").GetString(hostname, sizeof(hostname));
+    Embed.AddField("Name:", hostname, false);
+
+    char sv_tags[128];
+    FindConVar("sv_tags").GetString(sv_tags, sizeof(sv_tags));
+    Format(sv_tags, sizeof(sv_tags), "-# `%s`", sv_tags);
+    Embed.AddField("Tags:", sv_tags, false);
+
+    Embed.AddField("Previous Map:", map, true);
     
     hook.Embed(Embed);
     hook.Send();
@@ -453,7 +364,7 @@ public void PrintToDiscordMapChange(const char[] map, int color)
 public void PrintToChannel(char[] webhook, const char[] msg, int color)
 {
     DiscordWebHook hook = new DiscordWebHook(webhook);
-    hook.SetUsername("SourceMod Server Relay");
+    hook.SetUsername("Server Status");
 
     MessageEmbed embed = new MessageEmbed();
     embed.SetColor(color);
@@ -506,7 +417,7 @@ public void OnChannelsReceived(DiscordBot bot, const char[] guild, DiscordChanne
         LogMessage("Listening to #%s for messages...", channelName);
         if (!g_ChatAnnounced)
         {
-            PrintToChannel(g_sDiscordWebhook, "Listening to chat messages...", GREEN);
+            PrintToChannel(g_sDiscordWebhook, "Listening to chat messages...", WHITE);
             g_ChatAnnounced = true;
         }
     }
@@ -516,7 +427,7 @@ public void OnChannelsReceived(DiscordBot bot, const char[] guild, DiscordChanne
         LogMessage("Listening to #%s for RCON commands...", channelName);
         if (!g_RCONAnnounced)
         {
-            PrintToChannel(g_sRCONWebhook, "Listening to RCON commands...", GREEN);
+            PrintToChannel(g_sRCONWebhook, "Listening to RCON commands...", WHITE);
             g_RCONAnnounced = true;
         }
     }
@@ -543,13 +454,14 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
         author.GetUsername(discorduser, sizeof(discorduser));
         
         char chatMessage[256];
-        Format(chatMessage, sizeof(chatMessage), "%s[%sDiscord%s] %s%s%s: %s", 
-            g_msg_textcol, g_msg_varcol, g_msg_textcol, 
-            g_msg_varcol, discorduser, g_msg_textcol, 
-            message);
+        Format(
+        chatMessage, sizeof(chatMessage),
+        "*DISCORD* %s%s : %s%s", 
+        g_msg_varcol, discorduser, g_msg_textcol, message
+        );
 
         char consoleMessage[256];
-        Format(consoleMessage, sizeof(consoleMessage), "[Discord] %s : %s", discorduser, message);
+        Format(consoleMessage, sizeof(consoleMessage), "*DISCORD* %s : %s", discorduser, message);
 
         CPrintToChatAll(chatMessage);
         LogMessage(consoleMessage);
@@ -566,6 +478,13 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
             DiscordWebHook hook = new DiscordWebHook(g_sRCONWebhook);
             hook.SetContent(response);
             hook.SetUsername("RCON");
+
+            MessageEmbed Embed = new MessageEmbed();
+            Embed.SetColor(BLACK);
+            Embed.AddField("Command", message, false);
+            Embed.AddField("Response", response, false);
+
+            hook.Embed(Embed);
             hook.Send();
             delete hook;
         }
@@ -582,6 +501,7 @@ stock bool IsValidClient(int client)
            client <= MaxClients && 
            IsClientConnected(client) && 
            !IsFakeClient(client) && 
+           !IsClientSourceTV(client) && 
            IsClientInGame(client);
 }
 

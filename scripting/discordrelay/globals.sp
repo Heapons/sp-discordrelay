@@ -1,9 +1,11 @@
-#define GREEN 32768
-#define RED 16733522
-#define YELLOW 14329120
-#define LIGHT_BLUE 6591981
-
-#define UPDATE_URL "https://raw.githubusercontent.com/maxijabase/sp-discordrelay/main/updatefile.txt"
+#define GREEN 0x2E8B57
+#define RED 0xDC143C
+#define YELLOW 0xFDCB57
+#define BLUE 0x3498DB
+#define PURPLE 0x9B59B6
+#define ORANGE 0xE67E22
+#define WHITE 0xECF0F1
+#define BLACK 0x2C3E50
 
 DiscordBot g_Bot;
 Player g_Players[1000];
