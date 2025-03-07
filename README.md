@@ -41,5 +41,5 @@ Place [`discordrelay.smx`](https://github.com/Heapons/sp-discordrelay/raw/refs/h
 | `discrelay_rcon_channelid` | Discord channel ID for where RCON commands should be sent. |
 | `discrelay_rcon_printreponse` | Prints server response to the command. |
 | `discrelay_rcon_webhook` | Webhook for RCON response. |
-> [!IMPORTANT] 
+> [!CAUTION] 
 > **Warning to server owners:** Only let people you trust have access to the RCON channel; all messages sent in this channel are considered to be commands.
