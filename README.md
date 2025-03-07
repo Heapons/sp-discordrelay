@@ -7,12 +7,13 @@ Discord ⇄ Server interaction for the Source Engine
 Place [`discordrelay.smx`](https://github.com/Heapons/sp-discordrelay/raw/refs/heads/main/plugins/discordrelay.smx) inside of `/addons/sourcemod/plugins` and update convars in `/cfg/sourcemod/discordrelay.cfg` after running the plugin.
 
 # Dependencies
+- [SteamWorks](https://forums.alliedmods.net/showthread.php?t=229556)
+- [Discord API](https://github.com/maxijabase/sourcemod-discord)
+- [REST in Pawn](https://forums.alliedmods.net/showthread.php?t=298024)
 
-- SteamWorks - https://forums.alliedmods.net/showthread.php?t=229556
-- discord-api - https://github.com/Cruze03/sourcemod-discord
-- ripext (sourcemod REST api) - https://forums.alliedmods.net/showthread.php?t=298024
+> [!NOTE]
+> If you plan to send messages/requests to the server from discord ensure you have Message Intents enabled in the app dashboard.
 
-*Note - If you plan to send messages/requests to the server from discord ensure you have Message Intents enabled in the app dashboard.
 ![unknown](https://user-images.githubusercontent.com/42725021/191847732-36a08338-ca11-4ae3-8584-ddc9a308400a.png)
 
 
@@ -40,6 +41,5 @@ Place [`discordrelay.smx`](https://github.com/Heapons/sp-discordrelay/raw/refs/h
 | `discrelay_rcon_channelid` | Discord channel ID for where RCON commands should be sent. |
 | `discrelay_rcon_printreponse` | Prints server response to the command. |
 | `discrelay_rcon_webhook` | Webhook for RCON response. |
-
 > [!IMPORTANT] 
 > **Warning to server owners:** Only let people you trust have access to the RCON channel; all messages sent in this channel are considered to be commands.
