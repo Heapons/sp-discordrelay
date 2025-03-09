@@ -345,7 +345,7 @@ public void PrintToDiscordPreviousMap(const char[] map, int color)
     Embed.SetColor(color);
 
     char hostname[512];
-    Format(hostname, sizeof(hostname), "[%s](https://discord.com/channels/292703237755240448/1270955491014475837/1276484723417419901)", hostname);
+    Format(hostname, sizeof(hostname), "%s", hostname);
     FindConVar("hostname").GetString(hostname, sizeof(hostname));
     Embed.AddField("Name:", hostname, false);
 
@@ -366,14 +366,13 @@ public void PrintToChannel(char[] webhook, const char[] msg, int color)
     DiscordWebHook hook = new DiscordWebHook(webhook);
     hook.SetUsername("Server Status");
 
-    MessageEmbed embed = new MessageEmbed();
-    embed.SetColor(color);
+    MessageEmbed Embed = new MessageEmbed();
+    Embed.SetColor(color);
 
     char formattedMsg[64];
-    Format(formattedMsg, sizeof(formattedMsg), "Discord Relay v%s - %s", PLUGIN_VERSION, msg);
-    embed.SetTitle(formattedMsg);
+    Format(formattedMsg, sizeof(formattedMsg), "%s", msg);
 
-    hook.Embed(embed);
+    hook.Embed(Embed);
     hook.Send();
     delete hook;
 }
@@ -472,7 +471,7 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
         if (g_cvPrintRCONResponse.BoolValue)
         {
             char response[2048];
-            ServerCommandEx(response, sizeof(response), message);
+            ServerCommandEx(response, sizeof(response), "`%s`", message);
             Format(response, sizeof(response), "```%s```", response);
             
             DiscordWebHook hook = new DiscordWebHook(g_sRCONWebhook);
