@@ -13,7 +13,7 @@
 #include "discordrelay/convars.sp"
 #include "discordrelay/globals.sp"
 
-#define PLUGIN_VERSION "1.4"
+#define PLUGIN_VERSION "1.4.1"
 
 public Plugin myinfo = 
 {
@@ -369,8 +369,23 @@ public void PrintToChannel(char[] webhook, const char[] msg, int color)
     MessageEmbed Embed = new MessageEmbed();
     Embed.SetColor(color);
 
-    char formattedMsg[64];
-    Format(formattedMsg, sizeof(formattedMsg), "%s", msg);
+    Embed.AddField("", msg, false);
+
+    hook.Embed(Embed);
+    hook.Send();
+    delete hook;
+}
+
+public void AnnounceToChannel(char[] webhook, const char[] msg, int color)
+{
+    DiscordWebHook hook = new DiscordWebHook(webhook);
+    hook.SetUsername("Server Status");
+    hook.SetAvatar("https://wiki.teamfortress.com/w/images/d/d6/Alert.png");
+
+    MessageEmbed Embed = new MessageEmbed();
+    Embed.SetColor(color);
+    
+    Embed.AddField("", buffer, false);
 
     hook.Embed(Embed);
     hook.Send();
