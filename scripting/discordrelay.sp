@@ -384,8 +384,8 @@ public void AnnounceToChannel(char[] webhook, const char[] msg, int color)
 
     MessageEmbed Embed = new MessageEmbed();
     Embed.SetColor(color);
-    
-    Embed.AddField("", buffer, false);
+
+    Embed.AddField("", msg, false);
 
     hook.Embed(Embed);
     hook.Send();
