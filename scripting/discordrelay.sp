@@ -400,10 +400,11 @@ public Action Timer_GetGuildList(Handle timer)
 
 public void OnGuildsReceived(DiscordBot bot, DiscordGuild guild)
 {
-    g_Bot.GetChannel(g_sChannelId, OnChannelsReceived);
+    g_Bot.GetChannel(g_sChannelId, OnRelayChannelReceived);
+    g_Bot.GetChannel(g_sRCONChannelId, OnRCONChannelReceived);
 }
 
-public void OnChannelsReceived(DiscordBot bot, DiscordChannel channel)
+public void OnRelayChannelReceived(DiscordBot bot, DiscordChannel channel)
 {
     if (g_Bot == null || channel == null)
     {
@@ -416,12 +417,11 @@ public void OnChannelsReceived(DiscordBot bot, DiscordChannel channel)
         return;
     }
     
-    char id[20];
-    channel.GetID(id, sizeof(id));
-    char channelName[64];
-    channel.GetName(channelName, sizeof(channelName));
-    if (g_cvDiscordToServer.BoolValue && StrEqual(id, g_sChannelId))
+    if (g_cvDiscordToServer.BoolValue)
     {
+		char channelName[64];
+		channel.GetName(channelName, sizeof(channelName));
+
         g_Bot.StartListeningToChannel(channel, OnDiscordMessageSent);
         LogMessage("Listening to #%s for messages...", channelName);
         if (!g_ChatAnnounced)
@@ -430,8 +430,26 @@ public void OnChannelsReceived(DiscordBot bot, DiscordChannel channel)
             g_ChatAnnounced = true;
         }
     }
-    if (g_cvRCONDiscordToServer.BoolValue && StrEqual(id, g_sRCONChannelId))
+}
+
+public void OnRCONChannelReceived(DiscordBot bot, DiscordChannel channel)
+{
+    if (g_Bot == null || channel == null)
     {
+        LogError("Invalid Bot or Channel!");
+        return;
+    }
+
+    if (g_Bot.IsListeningToChannel(channel))
+    {
+        return;
+    }
+    
+    if (g_cvRCONDiscordToServer.BoolValue)
+    {
+		char channelName[64];
+		channel.GetName(channelName, sizeof(channelName));
+
         g_Bot.StartListeningToChannel(channel, OnDiscordMessageSent);
         LogMessage("Listening to #%s for RCON commands...", channelName);
         if (!g_RCONAnnounced)
