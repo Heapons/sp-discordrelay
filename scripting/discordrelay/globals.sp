@@ -1,14 +1,13 @@
-#define GREEN 0x2E8B57
-#define RED 0xDC143C
-#define YELLOW 0xFDCB57
-#define BLUE 0x3498DB
-#define PURPLE 0x9B59B6
-#define ORANGE 0xE67E22
-#define WHITE 0xECF0F1
-#define BLACK 0x2C3E50
+#define GREEN "2E8B57"
+#define RED "DC143C"
+#define YELLOW "FDCB57"
+#define BLUE "3498DB"
+#define PURPLE "9B59B6"
+#define ORANGE "E67E22"
+#define WHITE "ECF0F1"
+#define BLACK "2C3E50"
 
 DiscordBot g_Bot;
-Player g_Players[1000];
 bool g_Late;
 bool g_ChatAnnounced;
 bool g_RCONAnnounced;
@@ -27,6 +26,8 @@ enum struct Player
         GetSteamID(this.UserID);
     }
 }
+
+Player g_Players[1000];
 
 void GetSteamID(int userid)
 {

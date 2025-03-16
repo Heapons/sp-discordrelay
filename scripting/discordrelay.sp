@@ -1,7 +1,3 @@
-#pragma semicolon 1
-#pragma newdecls required
-
-#include <sourcemod>
 #include <sdkhooks>
 #include <sdktools>
 #include <discord>
@@ -9,6 +5,9 @@
 #include <autoexecconfig>
 #undef REQUIRE_EXTENSIONS
 #include <ripext>
+
+#pragma semicolon 1
+#pragma newdecls required
 
 #include "discordrelay/convars.sp"
 #include "discordrelay/globals.sp"
@@ -215,7 +214,7 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
     PrintToDiscordSay(client ? GetClientUserId(client) : 0, buffer);
 }
 
-public void PrintToDiscord(int userid, int color, const char[] msg, any...)
+public void PrintToDiscord(int userid, const char[] color, const char[] msg, any...)
 {
     if (!g_cvServerToDiscord.BoolValue || !g_cvMessage.BoolValue)
     {
@@ -235,7 +234,7 @@ public void PrintToDiscord(int userid, int color, const char[] msg, any...)
     Format(buffer, sizeof(buffer), "%N", client);
     hook.SetUsername(buffer);
     
-    MessageEmbed Embed = new MessageEmbed();
+    DiscordEmbed Embed = new DiscordEmbed();
     Embed.SetColor(color);
     
     char playerName[512];
@@ -249,8 +248,9 @@ public void PrintToDiscord(int userid, int color, const char[] msg, any...)
         Format(playerName, sizeof(playerName), "%N", client);
     }
     
-    Embed.AddField("", playerName, true);
-    Embed.AddField("", msg, true);
+	
+    Embed.AddField(new DiscordEmbedField("", playerName, true));
+    Embed.AddField(new DiscordEmbedField("", msg, true));
     
     hook.Embed(Embed);
     hook.Send();
@@ -297,7 +297,7 @@ public void PrintToDiscordSay(int userid, const char[] msg, any...)
     delete hook;
 }
 
-public void PrintToDiscordMapChange(const char[] map, int color)
+public void PrintToDiscordMapChange(const char[] map, const char[] color)
 {
     if (!g_cvServerToDiscord.BoolValue || !g_cvMapChangeMessage.BoolValue)
     {
@@ -307,31 +307,31 @@ public void PrintToDiscordMapChange(const char[] map, int color)
     DiscordWebHook hook = new DiscordWebHook(g_sDiscordWebhook);
     hook.SetUsername("Server Status");
     
-    MessageEmbed Embed = new MessageEmbed();
+    DiscordEmbed Embed = new DiscordEmbed();
     Embed.SetColor(color);
 
     char hostname[512];
     Format(hostname, sizeof(hostname), "[%s](https://discord.com/channels/292703237755240448/1270955491014475837/1276484723417419901)", hostname);
     FindConVar("hostname").GetString(hostname, sizeof(hostname));
-    Embed.AddField("Name:", hostname, false);
+    Embed.AddField(new DiscordEmbedField("Name:", hostname, false));
 
     char sv_tags[128];
     FindConVar("sv_tags").GetString(sv_tags, sizeof(sv_tags));
     Format(sv_tags, sizeof(sv_tags), "-# `%s`", sv_tags);
-    Embed.AddField("Tags:", sv_tags, false);
+    Embed.AddField(new DiscordEmbedField("Tags:", sv_tags, false));
     
-    Embed.AddField("Current Map:", map, true);
+    Embed.AddField(new DiscordEmbedField("Current Map:", map, true));
     
     char buffer[512];
     Format(buffer, sizeof(buffer), "%d/%d", GetOnlinePlayers(), GetMaxHumanPlayers());
-    Embed.AddField("Player Count:", buffer, true);
+    Embed.AddField(new DiscordEmbedField("Player Count:", buffer, true));
     
     hook.Embed(Embed);
     hook.Send();
     delete hook;
 }
 
-public void PrintToDiscordPreviousMap(const char[] map, int color)
+public void PrintToDiscordPreviousMap(const char[] map, const char[] color)
 {
     if (!g_cvServerToDiscord.BoolValue || !g_cvMapChangeMessage.BoolValue)
     {
@@ -341,51 +341,51 @@ public void PrintToDiscordPreviousMap(const char[] map, int color)
     DiscordWebHook hook = new DiscordWebHook(g_sDiscordWebhook);
     hook.SetUsername("Server Status");
     
-    MessageEmbed Embed = new MessageEmbed();
+    DiscordEmbed Embed = new DiscordEmbed();
     Embed.SetColor(color);
 
     char hostname[512];
     Format(hostname, sizeof(hostname), "%s", hostname);
     FindConVar("hostname").GetString(hostname, sizeof(hostname));
-    Embed.AddField("Name:", hostname, false);
+    Embed.AddField(new DiscordEmbedField("Name:", hostname, false));
 
     char sv_tags[128];
     FindConVar("sv_tags").GetString(sv_tags, sizeof(sv_tags));
     Format(sv_tags, sizeof(sv_tags), "-# `%s`", sv_tags);
-    Embed.AddField("Tags:", sv_tags, false);
+    Embed.AddField(new DiscordEmbedField("Tags:", sv_tags, false));
 
-    Embed.AddField("Previous Map:", map, true);
+    Embed.AddField(new DiscordEmbedField("Previous Map:", map, true));
     
     hook.Embed(Embed);
     hook.Send();
     delete hook;
 }
 
-public void PrintToChannel(char[] webhook, const char[] msg, int color)
+public void PrintToChannel(char[] webhook, const char[] msg, const char[] color)
 {
     DiscordWebHook hook = new DiscordWebHook(webhook);
     hook.SetUsername("Server Status");
 
-    MessageEmbed Embed = new MessageEmbed();
+    DiscordEmbed Embed = new DiscordEmbed();
     Embed.SetColor(color);
 
-    Embed.AddField("", msg, false);
+    Embed.AddField(new DiscordEmbedField("", msg, false));
 
     hook.Embed(Embed);
     hook.Send();
     delete hook;
 }
 
-public void AnnounceToChannel(char[] webhook, const char[] msg, int color)
+public void AnnounceToChannel(char[] webhook, const char[] msg, const char[] color)
 {
     DiscordWebHook hook = new DiscordWebHook(webhook);
     hook.SetUsername("Server Status");
     hook.SetAvatar("https://wiki.teamfortress.com/w/images/d/d6/Alert.png");
 
-    MessageEmbed Embed = new MessageEmbed();
+    DiscordEmbed Embed = new DiscordEmbed();
     Embed.SetColor(color);
 
-    Embed.AddField("", msg, false);
+    Embed.AddField(new DiscordEmbedField("", msg, false));
 
     hook.Embed(Embed);
     hook.Send();
@@ -394,40 +394,35 @@ public void AnnounceToChannel(char[] webhook, const char[] msg, int color)
 
 public Action Timer_GetGuildList(Handle timer)
 {
-    g_Bot.GetGuilds(OnGuildsReceived);
+    g_Bot.GetGuild(g_sDiscordServerId, false, OnGuildsReceived);
     return Plugin_Continue;
 }
 
-public void OnGuildsReceived(DiscordBot bot, char[] id, char[] name, char[] icon, bool owner, int permissions, any data)
+public void OnGuildsReceived(DiscordBot bot, DiscordGuild guild)
 {
-    g_Bot.GetGuildChannels(id, OnChannelsReceived);
+    g_Bot.GetChannel(g_sChannelId, OnChannelsReceived);
 }
 
-public void OnChannelsReceived(DiscordBot bot, const char[] guild, DiscordChannel chl, any data)
+public void OnChannelsReceived(DiscordBot bot, DiscordChannel channel)
 {
-    if (!StrEqual(guild, g_sDiscordServerId))
-    {
-        return;
-    }
-
-    if (g_Bot == null || chl == null)
+    if (g_Bot == null || channel == null)
     {
         LogError("Invalid Bot or Channel!");
         return;
     }
 
-    if (g_Bot.IsListeningToChannel(chl))
+    if (g_Bot.IsListeningToChannel(channel))
     {
         return;
     }
     
     char id[20];
-    chl.GetID(id, sizeof(id));
+    channel.GetID(id, sizeof(id));
     char channelName[64];
-    chl.GetName(channelName, sizeof(channelName));
+    channel.GetName(channelName, sizeof(channelName));
     if (g_cvDiscordToServer.BoolValue && StrEqual(id, g_sChannelId))
     {
-        g_Bot.StartListeningToChannel(chl, OnDiscordMessageSent);
+        g_Bot.StartListeningToChannel(channel, OnDiscordMessageSent);
         LogMessage("Listening to #%s for messages...", channelName);
         if (!g_ChatAnnounced)
         {
@@ -437,7 +432,7 @@ public void OnChannelsReceived(DiscordBot bot, const char[] guild, DiscordChanne
     }
     if (g_cvRCONDiscordToServer.BoolValue && StrEqual(id, g_sRCONChannelId))
     {
-        g_Bot.StartListeningToChannel(chl, OnDiscordMessageSent);
+        g_Bot.StartListeningToChannel(channel, OnDiscordMessageSent);
         LogMessage("Listening to #%s for RCON commands...", channelName);
         if (!g_RCONAnnounced)
         {
@@ -450,7 +445,7 @@ public void OnChannelsReceived(DiscordBot bot, const char[] guild, DiscordChanne
 public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMessage discordmessage)
 {
     DiscordUser author = discordmessage.GetAuthor();
-    if (author.IsBot())
+    if (author.IsBot)
     {
         delete author;
         return;
@@ -493,10 +488,10 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
             hook.SetContent(response);
             hook.SetUsername("RCON");
 
-            MessageEmbed Embed = new MessageEmbed();
+            DiscordEmbed Embed = new DiscordEmbed();
             Embed.SetColor(BLACK);
-            Embed.AddField("Command", message, false);
-            Embed.AddField("Response", response, false);
+            Embed.AddField(new DiscordEmbedField("Command", message, false));
+            Embed.AddField(new DiscordEmbedField("Response", response, false));
 
             hook.Embed(Embed);
             hook.Send();
