@@ -2,6 +2,8 @@ ConVar g_cvmsg_textcol;
 char g_msg_textcol[32];
 ConVar g_cvmsg_varcol;
 char g_msg_varcol[32];
+ConVar g_cvmsg_prefix;
+char g_msg_prefix[32];
 
 ConVar g_cvSteamApiKey;
 char g_sSteamApiKey[128];
@@ -31,6 +33,8 @@ ConVar g_cvDisconnectMessage;
 ConVar g_cvMapChangeMessage;
 ConVar g_cvMessage;
 ConVar g_cvHideExclamMessage;
+ConVar g_cvShowServerTags;
+ConVar g_cvShowServerName;
 
 void SetupConvars() 
 {
@@ -62,10 +66,14 @@ void SetupConvars()
     g_cvMapChangeMessage = AutoExecConfig_CreateConVar("discrelay_mapchangemessage", "1", "relays map changes to Discord (discrelay_servertodiscord needs to set to 1)");
     g_cvMessage = AutoExecConfig_CreateConVar("discrelay_message", "1", "relays client messages to Discord (discrelay_servertodiscord needs to set to 1)");
     g_cvHideExclamMessage = AutoExecConfig_CreateConVar("discrelay_hideexclammessage", "1", "Hides any message that begins with !");
+    g_cvShowServerTags = AutoExecConfig_CreateConVar("discrelay_showservertags", "1", "Displays sv_tags in server status");
+    g_cvShowServerName = AutoExecConfig_CreateConVar("discrelay_showservername", "1", "Displays hostname in server status");
     
     // Customization
-    g_cvmsg_textcol = AutoExecConfig_CreateConVar("discrelay_msg_textcol", "{default}", "text color of Discord to server text (refer to github for support, the ways you can chose colors depends on game)");
-    g_cvmsg_varcol = AutoExecConfig_CreateConVar("discrelay_msg_varcol", "{gray}", "variable color of Discord to server text (refer to github for support, the ways you can chose colors depends on game)");
+    g_cvmsg_textcol = AutoExecConfig_CreateConVar("discrelay_msg_textcol", "{default}", "Color of Discord messages");
+    g_cvmsg_varcol = AutoExecConfig_CreateConVar("discrelay_msg_varcol", "{gray}", "Color of Discord usernames");
+    g_cvmsg_prefix = AutoExecConfig_CreateConVar("discrelay_msg_prefix", "*DISCORD*", "Prefix for Discord messages");
+
     
     AutoExecConfig_CleanFile();
     AutoExecConfig_ExecuteFile();
@@ -81,7 +89,7 @@ void SetupConvars()
     
     g_cvmsg_textcol.GetString(g_msg_textcol, sizeof(g_msg_textcol));
     g_cvmsg_varcol.GetString(g_msg_varcol, sizeof(g_msg_varcol));
-    
+    g_cvmsg_prefix.GetString(g_msg_prefix, sizeof(g_msg_prefix));
     
     g_cvSteamApiKey.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvDiscordBotToken.AddChangeHook(OnDiscordRelayCvarChanged);
@@ -94,6 +102,7 @@ void SetupConvars()
     
     g_cvmsg_textcol.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvmsg_varcol.AddChangeHook(OnDiscordRelayCvarChanged);
+    g_cvmsg_prefix.AddChangeHook(OnDiscordRelayCvarChanged);
 }
 
 public void OnDiscordRelayCvarChanged(ConVar convar, char[] oldValue, char[] newValue)
@@ -107,4 +116,5 @@ public void OnDiscordRelayCvarChanged(ConVar convar, char[] oldValue, char[] new
     g_cvRCONChannelId.GetString(g_sRCONChannelId, sizeof(g_sRCONChannelId));
     g_cvmsg_textcol.GetString(g_msg_textcol, sizeof(g_msg_textcol));
     g_cvmsg_varcol.GetString(g_msg_varcol, sizeof(g_msg_varcol));
+    g_cvmsg_prefix.GetString(g_msg_prefix, sizeof(g_msg_prefix));
 }
