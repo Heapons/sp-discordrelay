@@ -163,7 +163,7 @@ public Action Timer_CreateBot(Handle timer)
 
     if (g_Bot)
     {
-        LogMessage("Bot already configured, skipping...");
+        PrintToServer("Bot already configured, skipping...");
         return Plugin_Handled;
     }
 
@@ -210,6 +210,26 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
     {
         ReplaceString(buffer, sizeof(buffer), "@", "＠");
     }
+    // Remove '{<color>}' string from messages to prevent color tags from being sent to Discord
+    char temp[128];
+    int pos = 0;
+    int len = strlen(buffer);
+    for (int i = 0; i < len; i++)
+    {
+        if (buffer[i] == '{')
+        {
+            while (i < len && buffer[i] != '}')
+            {
+                i++;
+            }
+        }
+        else
+        {
+            temp[pos++] = buffer[i];
+        }
+    }
+    temp[pos] = '\0';
+    strcopy(buffer, sizeof(buffer), temp);
 
     PrintToDiscordSay(client ? GetClientUserId(client) : 0, buffer);
 }
@@ -476,7 +496,7 @@ public void OnRelayChannelReceived(DiscordBot bot, DiscordChannel channel)
 		channel.GetName(channelName, sizeof(channelName));
 
         g_Bot.StartListeningToChannel(channel, OnDiscordMessageSent);
-        LogMessage("Listening to #%s for messages...", channelName);
+        PrintToServer("Listening to #%s for messages...", channelName);
         if (!g_ChatAnnounced)
         {
             PrintToChannel(g_sDiscordWebhook, "Listening to chat messages...", WHITE);
@@ -504,7 +524,7 @@ public void OnRCONChannelReceived(DiscordBot bot, DiscordChannel channel)
 		channel.GetName(channelName, sizeof(channelName));
 
         g_Bot.StartListeningToChannel(channel, OnDiscordMessageSent);
-        LogMessage("Listening to #%s for RCON commands...", channelName);
+        PrintToServer("Listening to #%s for RCON commands...", channelName);
         if (!g_RCONAnnounced)
         {
             PrintToChannel(g_sRCONWebhook, "Listening to RCON commands...", WHITE);
@@ -555,7 +575,7 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
         Format(consoleMessage, sizeof(consoleMessage), "*DISCORD* %s : %s", discorduser, message);
 
         CPrintToChatAll(chatMessage);
-        LogMessage(consoleMessage);
+        PrintToServer(consoleMessage);
         delete author;
     }
     if (StrEqual(id, g_sRCONChannelId))
