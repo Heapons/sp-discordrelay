@@ -13,7 +13,7 @@ Un-zip [`discordrelay.zip`](https://github.com/Heapons/sp-discordrelay/tags) ins
 > [!NOTE]
 > If you plan to send messages/requests to the server from discord ensure you have Message Intents enabled in the app dashboard.
 
-![unknown](https://user-images.githubusercontent.com/42725021/191847732-36a08338-ca11-4ae3-8584-ddc9a308400a.png
+![Message Intents](https://user-images.githubusercontent.com/42725021/191847732-36a08338-ca11-4ae3-8584-ddc9a308400a.png)
 
 # Configuration
 ## ConVars
