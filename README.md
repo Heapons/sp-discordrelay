@@ -45,5 +45,6 @@ Place [`discordrelay.smx`](https://github.com/Heapons/sp-discordrelay/tags) insi
 | `discrelay_msg_prefix` | The prefix for messages sent from Discord to the server. |
 | `discrelay_showservertags` | Displays sv_tags in server status. |
 | `discrelay_showservername` | Displays hostname in server status. |
+| `discrelay_rcon_highlight` | Syntax highlighting for RCON responses. See: https://highlightjs.org/demo |
 > [!CAUTION] 
 > **Warning to server owners:** Only let people you trust have access to the RCON channel; all messages sent in this channel are considered to be commands.
