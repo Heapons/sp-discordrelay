@@ -320,7 +320,25 @@ public void PrintToDiscordMapChange(const char[] map, const char[] color)
     Format(sv_tags, sizeof(sv_tags), "-# `%s`", sv_tags);
     Embed.AddField(new DiscordEmbedField("Tags:", sv_tags, false));
     
-    Embed.AddField(new DiscordEmbedField("Current Map:", map, true));
+    char mapFastDL[512];
+    if (StrContains(map, "workshop/", false) != -1)
+    {
+        char workshopId[2][32];
+        ExplodeString(map, "/", workshopId, sizeof(workshopId), sizeof(workshopId[]));
+
+        char mapName[2][64];
+        ExplodeString(workshopId[1], ".ugc", mapName, sizeof(mapName), sizeof(mapName[]));
+
+        Format(mapFastDL, sizeof(mapFastDL), "[%s](https://steamcommunity.com/sharedfiles/filedetails/?id=%s)", mapName[0], mapName[1]);
+    }
+    else
+    {
+        char sv_downloadurl[512];
+        FindConVar("sv_downloadurl").GetString(sv_downloadurl, sizeof(sv_downloadurl));
+        Format(mapFastDL, sizeof(mapFastDL), "[%s](%s/maps/%s.bsp)", map, sv_downloadurl, map);
+    }
+    
+    Embed.AddField(new DiscordEmbedField("Current Map:", mapFastDL, true));
     
     char buffer[512];
     Format(buffer, sizeof(buffer), "%d/%d", GetOnlinePlayers(), GetMaxHumanPlayers());
@@ -354,7 +372,25 @@ public void PrintToDiscordPreviousMap(const char[] map, const char[] color)
     Format(sv_tags, sizeof(sv_tags), "-# `%s`", sv_tags);
     Embed.AddField(new DiscordEmbedField("Tags:", sv_tags, false));
 
-    Embed.AddField(new DiscordEmbedField("Previous Map:", map, true));
+    char mapFastDL[512];
+    if (StrContains(map, "workshop/", false) != -1)
+    {
+        char workshopId[2][32];
+        ExplodeString(map, "/", workshopId, sizeof(workshopId), sizeof(workshopId[]));
+
+        char mapName[2][64];
+        ExplodeString(workshopId[1], ".ugc", mapName, sizeof(mapName), sizeof(mapName[]));
+
+        Format(mapFastDL, sizeof(mapFastDL), "[%s](https://steamcommunity.com/sharedfiles/filedetails/?id=%s)", mapName[0], mapName[1]);
+    }
+    else
+    {
+        char sv_downloadurl[512];
+        FindConVar("sv_downloadurl").GetString(sv_downloadurl, sizeof(sv_downloadurl));
+        Format(mapFastDL, sizeof(mapFastDL), "[%s](%s/maps/%s.bsp)", map, sv_downloadurl, map);
+    }
+    
+    Embed.AddField(new DiscordEmbedField("Previous Map:", mapFastDL, true));
     
     hook.Embed(Embed);
     hook.Send();
@@ -499,17 +535,15 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
         if (g_cvPrintRCONResponse.BoolValue)
         {
             char response[2048];
-            ServerCommandEx(response, sizeof(response), "`%s`", message);
+            ServerCommandEx(response, sizeof(response), "%s", message);
             Format(response, sizeof(response), "```%s```", response);
             
             DiscordWebHook hook = new DiscordWebHook(g_sRCONWebhook);
-            hook.SetContent(response);
             hook.SetUsername("RCON");
 
             DiscordEmbed Embed = new DiscordEmbed();
             Embed.SetColor(BLACK);
-            Embed.AddField(new DiscordEmbedField("Command", message, false));
-            Embed.AddField(new DiscordEmbedField("Response", response, false));
+            Embed.AddField(new DiscordEmbedField("", response, false));
 
             hook.Embed(Embed);
             hook.Send();
