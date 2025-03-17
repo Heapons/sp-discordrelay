@@ -8,7 +8,7 @@ Place [`discordrelay.smx`](https://github.com/Heapons/sp-discordrelay/raw/refs/h
 
 # Dependencies
 - [SteamWorks](https://forums.alliedmods.net/showthread.php?t=229556)
-- [Discord API](https://github.com/KillStr3aK/discord-api)
+- [Discord API](https://github.com/Cruze03/discord-api-Killstr3ak)
 - [REST in Pawn](https://forums.alliedmods.net/showthread.php?t=298024)
 
 > [!NOTE]
