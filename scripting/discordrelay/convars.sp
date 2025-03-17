@@ -75,7 +75,7 @@ void SetupConvars()
     g_cvmsg_textcol = AutoExecConfig_CreateConVar("discrelay_msg_textcol", "{default}", "Color of Discord messages");
     g_cvmsg_varcol = AutoExecConfig_CreateConVar("discrelay_msg_varcol", "{gray}", "Color of Discord usernames");
     g_cvmsg_prefix = AutoExecConfig_CreateConVar("discrelay_msg_prefix", "*DISCORD*", "Prefix for Discord messages");
-    g_cvrcon_highlight = AutoExecConfig_CreateConVar("discrelay_rcon_highlight", "", "Syntax highlighting for RCON responses (see: https://highlightjs.org/demo)");
+    g_cvrcon_highlight = AutoExecConfig_CreateConVar("discrelay_rcon_highlight", "dsconfig", "Syntax highlighting for RCON responses (see: https://highlightjs.org/demo)");
 
     AutoExecConfig_CleanFile();
     AutoExecConfig_ExecuteFile();
