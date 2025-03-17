@@ -12,7 +12,7 @@
 #include "discordrelay/convars.sp"
 #include "discordrelay/globals.sp"
 
-#define PLUGIN_VERSION "1.4.2"
+#define PLUGIN_VERSION "1.4.3"
 
 public Plugin myinfo = 
 {
@@ -211,7 +211,7 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
         ReplaceString(buffer, sizeof(buffer), "@", "＠");
     }
     // Remove '{<color>}' string from messages to prevent color tags from being sent to Discord
-    char temp[128];
+    char colorTag[128];
     int pos = 0;
     int len = strlen(buffer);
     for (int i = 0; i < len; i++)
@@ -225,13 +225,22 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
         }
         else
         {
-            temp[pos++] = buffer[i];
+            colorTag[pos++] = buffer[i];
         }
     }
-    temp[pos] = '\0';
-    strcopy(buffer, sizeof(buffer), temp);
+    colorTag[pos] = '\0';
+    strcopy(buffer, sizeof(buffer), colorTag);
 
-    PrintToDiscordSay(client ? GetClientUserId(client) : 0, buffer);
+    if (g_cvShowSteamID.BoolValue)
+    {
+        char messageFooter[64];
+        Format(messageFooter, sizeof(messageFooter), "%s\n-# > `%s`", buffer, g_Players[GetClientUserId(client)].SteamID2);
+        PrintToDiscordSay(client ? GetClientUserId(client) : 0, messageFooter);
+    }
+    else
+    {
+        PrintToDiscordSay(client ? GetClientUserId(client) : 0, buffer);
+    }
 }
 
 public void PrintToDiscord(int userid, const char[] color, const char[] msg, any...)
@@ -262,6 +271,7 @@ public void PrintToDiscord(int userid, const char[] color, const char[] msg, any
     if (g_Players[userid].SteamID64[0] != '\0')
     {
         Format(playerName, sizeof(playerName), "[%N](http://www.steamcommunity.com/profiles/%s)", client, g_Players[userid].SteamID64);
+        Embed.WithFooter(new DiscordEmbedFooter(g_Players[userid].SteamID2));
     }
     else
     {
@@ -535,6 +545,9 @@ public void OnRCONChannelReceived(DiscordBot bot, DiscordChannel channel)
 
 public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMessage discordmessage)
 {
+/*
+ * CHAT
+ */
     DiscordUser author = discordmessage.GetAuthor();
     if (author.IsBot)
     {
@@ -568,16 +581,19 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
             chatMessage, sizeof(chatMessage),
             "%s%s%s :  %s", 
             g_msg_varcol, discorduser, g_msg_textcol, message
-            );
+            );  
         }
 
         char consoleMessage[256];
-        Format(consoleMessage, sizeof(consoleMessage), "*DISCORD* %s : %s", discorduser, message);
+        Format(consoleMessage, sizeof(consoleMessage), "%s %s: %s", g_msg_prefix, discorduser, message);
 
         CPrintToChatAll(chatMessage);
         PrintToServer(consoleMessage);
         delete author;
     }
+/*
+ * RCON
+ */
     if (StrEqual(id, g_sRCONChannelId))
     {
         if (g_cvPrintRCONResponse.BoolValue)
@@ -592,6 +608,7 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
             DiscordEmbed Embed = new DiscordEmbed();
             Embed.SetColor(BLACK);
             Embed.AddField(new DiscordEmbedField("", response, false));
+            Embed.WithFooter(new DiscordEmbedFooter(message));
 
             hook.Embed(Embed);
             hook.Send();

@@ -37,6 +37,7 @@ ConVar g_cvMessage;
 ConVar g_cvHideExclamMessage;
 ConVar g_cvShowServerTags;
 ConVar g_cvShowServerName;
+ConVar g_cvShowSteamID;
 
 void SetupConvars() 
 {
@@ -70,6 +71,7 @@ void SetupConvars()
     g_cvHideExclamMessage = AutoExecConfig_CreateConVar("discrelay_hideexclammessage", "1", "Hides any message that begins with !");
     g_cvShowServerTags = AutoExecConfig_CreateConVar("discrelay_showservertags", "1", "Displays sv_tags in server status");
     g_cvShowServerName = AutoExecConfig_CreateConVar("discrelay_showservername", "1", "Displays hostname in server status");
+    g_cvShowSteamID = AutoExecConfig_CreateConVar("discrelay_showsteamid", "0", "Displays a Player's Steam ID below every message");
     
     // Customization
     g_cvmsg_textcol = AutoExecConfig_CreateConVar("discrelay_msg_textcol", "{default}", "Color of Discord messages");
@@ -77,6 +79,7 @@ void SetupConvars()
     g_cvmsg_prefix = AutoExecConfig_CreateConVar("discrelay_msg_prefix", "*DISCORD*", "Prefix for Discord messages");
     g_cvrcon_highlight = AutoExecConfig_CreateConVar("discrelay_rcon_highlight", "dsconfig", "Syntax highlighting for RCON responses (see: https://highlightjs.org/demo)");
 
+    
     AutoExecConfig_CleanFile();
     AutoExecConfig_ExecuteFile();
     
