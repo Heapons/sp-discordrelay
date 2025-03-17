@@ -4,7 +4,7 @@ Discord ⇄ Server interaction for the Source Engine
 
 # Installation
 
-Place [`discordrelay.smx`](https://github.com/Heapons/sp-discordrelay/raw/refs/heads/main/plugins/discordrelay.smx) inside of `/addons/sourcemod/plugins` and update convars in `/cfg/sourcemod/discordrelay.cfg` after running the plugin.
+Place [`discordrelay.smx`](https://github.com/Heapons/sp-discordrelay/tags) inside of `/addons/sourcemod/plugins` and update convars in `/cfg/sourcemod/discordrelay.cfg` after running the plugin.
 
 # Dependencies
 - [SteamWorks](https://forums.alliedmods.net/showthread.php?t=229556)
