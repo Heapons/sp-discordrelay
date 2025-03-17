@@ -1,12 +1,11 @@
 # Discord Relay
-
-Discord ⇄ Server interaction for the Source Engine
+Discord ⇄ Server Relay for the Source Engine.
 
 # Installation
-
-Place [`discordrelay.smx`](https://github.com/Heapons/sp-discordrelay/tags) inside of `/addons/sourcemod/plugins` and update convars in `/cfg/sourcemod/discordrelay.cfg` after running the plugin.
+Un-zip [`discordrelay.zip`](https://github.com/Heapons/sp-discordrelay/tags) inside of `<game>/addons/sourcemod/plugins/...` and update convars in `/cfg/sourcemod/discordrelay.cfg` after running the plugin.
 
 # Dependencies
+(Requires [Sourcemod 1.10](https://www.sourcemod.net/downloads.php?branch=1.10-dev) to Compile!)
 - [SteamWorks](https://forums.alliedmods.net/showthread.php?t=229556)
 - [Discord API](https://github.com/Cruze03/discord-api-Killstr3ak)
 - [REST in Pawn](https://forums.alliedmods.net/showthread.php?t=298024)
@@ -14,13 +13,10 @@ Place [`discordrelay.smx`](https://github.com/Heapons/sp-discordrelay/tags) insi
 > [!NOTE]
 > If you plan to send messages/requests to the server from discord ensure you have Message Intents enabled in the app dashboard.
 
-![unknown](https://user-images.githubusercontent.com/42725021/191847732-36a08338-ca11-4ae3-8584-ddc9a308400a.png)
-
+![unknown](https://user-images.githubusercontent.com/42725021/191847732-36a08338-ca11-4ae3-8584-ddc9a308400a.png
 
 # Configuration
-
-## Configuration
-
+## ConVars
 | Cvar | Description |
 |------|-------------|
 | `discrelay_steamapikey` | This will be your steam API key which you can find at [Steam API Key](https://steamcommunity.com/dev/apikey). The key is used to grab the client's steam avatar. |

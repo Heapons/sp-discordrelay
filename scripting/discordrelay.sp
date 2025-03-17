@@ -18,7 +18,7 @@ public Plugin myinfo =
 {
     name = "[ANY] Discord Relay", 
     author = "Heapons (forked from log-ical and maxijabase)", 
-    description = "Discord and Server interaction", 
+    description = "Discord ⇄ Server Relay", 
     version = PLUGIN_VERSION, 
     url = "https://github.com/Heapons/sp-discordrelay"    
 }
