@@ -28,18 +28,22 @@ Place [`discordrelay.smx`](https://github.com/Heapons/sp-discordrelay/tags) insi
 | `discrelay_discordwebhook` | Set this to your Discord channel's webhook URL. You can create one by going to your Discord server, entering a text channel's settings, then in integrations create a webhook and copy the URL. |
 | `discrelay_discordserverid` | Enable Developer Mode in Discord, right click on the server name in the top left and click Copy ID. Required for communication between Discord and Source. |
 | `discrelay_channelid` | Enable Developer Mode in Discord, right click on the channel name and click Copy ID. This is the channel messages will appear in. |
+| `discrelay_rcon_channelid` | Discord channel ID for where RCON commands should be sent. |
+| `discrelay_rcon_webhook` | Webhook for RCON response. |
 | `discrelay_servertodiscord` | Enable to allow messages sent in the server to be sent through Discord via webhook. |
 | `discrelay_discordtoserver` | Enable to allow messages sent in Discord to be sent to the server. |
 | `discrelay_servertodiscordavatars` | Change avatar in messages sent to Discord to the client's Steam avatar. Requires a valid Steam API key. |
+| `discrelay_rcon_enabled` | Enable RCON functionality. |
+| `discrelay_rcon_printreponse` | Prints server response to the command. |
 | `discrelay_connectmessage` | Send client connection messages to Discord. |
 | `discrelay_disconnectmessage` | Send client disconnection messages to Discord. |
 | `discrelay_mapchangemessage` | Send map change messages to Discord. |
 | `discrelay_message` | Enable to allow client messages in the server to be sent to Discord. This is any message that's not a command, only exception is any ! command which can be hidden by enabling `discrelay_hideexclammessage`. |
 | `discrelay_hideexclammessage` | Hides any message that begins with ! or /, `discrelay_message` needs to be enabled for this to work. |
-| `discrelay_msg_textcol` & `discrelay_msg_varcol` | The colors used for the message that will be sent to the server when doing Discord -> server. The plugin uses morecolors.inc to supply the colors, so when setting the cvar make sure to set it like {red} for example. Depending on the game you are using different options to set the color can be chosen such as using hex (more information [here](https://forums.alliedmods.net/showthread.php?t=247770)). |
-| `discrelay_rcon_enabled` | Enable RCON functionality. |
-| `discrelay_rcon_channelid` | Discord channel ID for where RCON commands should be sent. |
-| `discrelay_rcon_printreponse` | Prints server response to the command. |
-| `discrelay_rcon_webhook` | Webhook for RCON response. |
+| `discrelay_msg_textcol` | The color used for the message that will be sent to the server when doing Discord -> server. The plugin uses morecolors.inc to supply the colors, so when setting the cvar make sure to set it like {red} for example. Depending on the game you are using different options to set the color can be chosen such as using hex (more information [here](https://forums.alliedmods.net/showthread.php?t=247770)). |
+| `discrelay_msg_varcol` | The color used for the variable part of the message that will be sent to the server when doing Discord -> server. |
+| `discrelay_msg_prefix` | The prefix for messages sent from Discord to the server. |
+| `discrelay_showservertags` | Displays sv_tags in server status. |
+| `discrelay_showservername` | Displays hostname in server status. |
 > [!CAUTION] 
 > **Warning to server owners:** Only let people you trust have access to the RCON channel; all messages sent in this channel are considered to be commands.
