@@ -310,15 +310,21 @@ public void PrintToDiscordMapChange(const char[] map, const char[] color)
     DiscordEmbed Embed = new DiscordEmbed();
     Embed.SetColor(color);
 
-    char hostname[512];
-    Format(hostname, sizeof(hostname), "[%s](https://discord.com/channels/292703237755240448/1270955491014475837/1276484723417419901)", hostname);
-    FindConVar("hostname").GetString(hostname, sizeof(hostname));
-    Embed.AddField(new DiscordEmbedField("Name:", hostname, false));
+    if (g_cvShowServerName.BoolValue)
+    {
+        char hostname[512];
+        Format(hostname, sizeof(hostname), "%s", hostname);
+        FindConVar("hostname").GetString(hostname, sizeof(hostname));
+        Embed.AddField(new DiscordEmbedField("Name:", hostname, false));
+    }
 
-    char sv_tags[128];
-    FindConVar("sv_tags").GetString(sv_tags, sizeof(sv_tags));
-    Format(sv_tags, sizeof(sv_tags), "-# `%s`", sv_tags);
-    Embed.AddField(new DiscordEmbedField("Tags:", sv_tags, false));
+    if (g_cvShowServerTags.BoolValue)
+    {
+        char sv_tags[128];
+        FindConVar("sv_tags").GetString(sv_tags, sizeof(sv_tags));
+        Format(sv_tags, sizeof(sv_tags), "-# `%s`", sv_tags);
+        Embed.AddField(new DiscordEmbedField("Tags:", sv_tags, false));
+    }
     
     char mapFastDL[512];
     if (StrContains(map, "workshop/", false) != -1)
@@ -362,15 +368,21 @@ public void PrintToDiscordPreviousMap(const char[] map, const char[] color)
     DiscordEmbed Embed = new DiscordEmbed();
     Embed.SetColor(color);
 
-    char hostname[512];
-    Format(hostname, sizeof(hostname), "%s", hostname);
-    FindConVar("hostname").GetString(hostname, sizeof(hostname));
-    Embed.AddField(new DiscordEmbedField("Name:", hostname, false));
+    if (g_cvShowServerName.BoolValue)
+    {
+        char hostname[512];
+        Format(hostname, sizeof(hostname), "%s", hostname);
+        FindConVar("hostname").GetString(hostname, sizeof(hostname));
+        Embed.AddField(new DiscordEmbedField("Name:", hostname, false));
+    }
 
-    char sv_tags[128];
-    FindConVar("sv_tags").GetString(sv_tags, sizeof(sv_tags));
-    Format(sv_tags, sizeof(sv_tags), "-# `%s`", sv_tags);
-    Embed.AddField(new DiscordEmbedField("Tags:", sv_tags, false));
+    if (g_cvShowServerTags.BoolValue)
+    {
+        char sv_tags[128];
+        FindConVar("sv_tags").GetString(sv_tags, sizeof(sv_tags));
+        Format(sv_tags, sizeof(sv_tags), "-# `%s`", sv_tags);
+        Embed.AddField(new DiscordEmbedField("Tags:", sv_tags, false));
+    }
 
     char mapFastDL[512];
     if (StrContains(map, "workshop/", false) != -1)
@@ -516,11 +528,22 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
         author.GetUsername(discorduser, sizeof(discorduser));
         
         char chatMessage[256];
-        Format(
-        chatMessage, sizeof(chatMessage),
-        "*DISCORD* %s%s%s :  %s", 
-        g_msg_varcol, discorduser, g_msg_textcol, message
-        );
+        if (g_msg_prefix[0] != '\0')
+        {
+            Format(
+            chatMessage, sizeof(chatMessage),
+            "%s %s%s%s :  %s", 
+            g_msg_prefix, g_msg_varcol, discorduser, g_msg_textcol, message
+            );
+        }
+        else
+        {
+            Format(
+            chatMessage, sizeof(chatMessage),
+            "%s%s%s :  %s", 
+            g_msg_varcol, discorduser, g_msg_textcol, message
+            );
+        }
 
         char consoleMessage[256];
         Format(consoleMessage, sizeof(consoleMessage), "*DISCORD* %s : %s", discorduser, message);
