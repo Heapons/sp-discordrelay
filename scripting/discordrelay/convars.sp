@@ -4,6 +4,8 @@ ConVar g_cvmsg_varcol;
 char g_msg_varcol[32];
 ConVar g_cvmsg_prefix;
 char g_msg_prefix[32];
+ConVar g_cvrcon_highlight;
+char g_rcon_highlight[32];
 
 ConVar g_cvSteamApiKey;
 char g_sSteamApiKey[128];
@@ -73,8 +75,8 @@ void SetupConvars()
     g_cvmsg_textcol = AutoExecConfig_CreateConVar("discrelay_msg_textcol", "{default}", "Color of Discord messages");
     g_cvmsg_varcol = AutoExecConfig_CreateConVar("discrelay_msg_varcol", "{gray}", "Color of Discord usernames");
     g_cvmsg_prefix = AutoExecConfig_CreateConVar("discrelay_msg_prefix", "*DISCORD*", "Prefix for Discord messages");
+    g_cvrcon_highlight = AutoExecConfig_CreateConVar("discrelay_rcon_highlight", "", "Syntax highlighting for RCON responses (see: https://highlightjs.org/demo)");
 
-    
     AutoExecConfig_CleanFile();
     AutoExecConfig_ExecuteFile();
     
@@ -90,6 +92,7 @@ void SetupConvars()
     g_cvmsg_textcol.GetString(g_msg_textcol, sizeof(g_msg_textcol));
     g_cvmsg_varcol.GetString(g_msg_varcol, sizeof(g_msg_varcol));
     g_cvmsg_prefix.GetString(g_msg_prefix, sizeof(g_msg_prefix));
+    g_cvrcon_highlight.GetString(g_rcon_highlight, sizeof(g_rcon_highlight));
     
     g_cvSteamApiKey.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvDiscordBotToken.AddChangeHook(OnDiscordRelayCvarChanged);
@@ -103,6 +106,7 @@ void SetupConvars()
     g_cvmsg_textcol.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvmsg_varcol.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvmsg_prefix.AddChangeHook(OnDiscordRelayCvarChanged);
+    g_cvrcon_highlight.AddChangeHook(OnDiscordRelayCvarChanged);
 }
 
 public void OnDiscordRelayCvarChanged(ConVar convar, char[] oldValue, char[] newValue)
@@ -117,4 +121,5 @@ public void OnDiscordRelayCvarChanged(ConVar convar, char[] oldValue, char[] new
     g_cvmsg_textcol.GetString(g_msg_textcol, sizeof(g_msg_textcol));
     g_cvmsg_varcol.GetString(g_msg_varcol, sizeof(g_msg_varcol));
     g_cvmsg_prefix.GetString(g_msg_prefix, sizeof(g_msg_prefix));
+    g_cvrcon_highlight.GetString(g_rcon_highlight, sizeof(g_rcon_highlight));
 }

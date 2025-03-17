@@ -12,7 +12,7 @@
 #include "discordrelay/convars.sp"
 #include "discordrelay/globals.sp"
 
-#define PLUGIN_VERSION "1.4.1"
+#define PLUGIN_VERSION "1.4.2"
 
 public Plugin myinfo = 
 {
@@ -277,7 +277,13 @@ public void PrintToDiscordSay(int userid, const char[] msg, any...)
 
         // If not a valid client, it must be the server
         hook.SetUsername("CONSOLE");
-        Format(formattedMessage, sizeof(formattedMessage), "%s", msg);
+        Format(formattedMessage, sizeof(formattedMessage), "```%s```", msg);
+
+        // Use embeds for server messages
+        DiscordEmbed Embed = new DiscordEmbed();
+        Embed.SetColor(PURPLE);
+        Embed.AddField(new DiscordEmbedField("", formattedMessage, false));
+        hook.Embed(Embed);
     }
     else
     {
@@ -290,9 +296,9 @@ public void PrintToDiscordSay(int userid, const char[] msg, any...)
         Format(buffer, sizeof(buffer), "%N", client);
         hook.SetUsername(buffer);
         Format(formattedMessage, sizeof(formattedMessage), "%s", msg);
+        hook.SetContent(formattedMessage);
     }
 
-    hook.SetContent(formattedMessage);
     hook.Send();
     delete hook;
 }
@@ -432,7 +438,7 @@ public void AnnounceToChannel(char[] webhook, const char[] msg, const char[] col
     DiscordEmbed Embed = new DiscordEmbed();
     Embed.SetColor(color);
 
-    Embed.AddField(new DiscordEmbedField("", msg, false));
+    Embed.AddField(new DiscordEmbedField(msg, "", false));
 
     hook.Embed(Embed);
     hook.Send();
@@ -558,7 +564,7 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
         {
             char response[2048];
             ServerCommandEx(response, sizeof(response), "%s", message);
-            Format(response, sizeof(response), "```%s```", response);
+            Format(response, sizeof(response), "```%s\n%s\n```", g_rcon_highlight, response);
             
             DiscordWebHook hook = new DiscordWebHook(g_sRCONWebhook);
             hook.SetUsername("RCON");
