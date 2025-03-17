@@ -17,7 +17,7 @@
 public Plugin myinfo = 
 {
     name = "[ANY] Discord Relay", 
-    author = "log-ical (ampere version; further edited by Heapons)", 
+    author = "Heapons (forked from log-ical and maxijabase)", 
     description = "Discord and Server interaction", 
     version = PLUGIN_VERSION, 
     url = "https://github.com/Heapons/sp-discordrelay"    
@@ -130,12 +130,12 @@ public void OnMapEnd()
 
 public void OnServerEnterHibernation()
 {
-    PrintToChannel(g_sDiscordWebhook, "Server is currently empty!", RED);
+    AnnounceToChannel(g_sDiscordWebhook, "Server is currently empty!", RED);
 }
 
 public void OnServerExitHibernation()
 {
-    PrintToChannel(g_sDiscordWebhook, "Someone joined the server!", GREEN);
+    AnnounceToChannel(g_sDiscordWebhook, "Someone joined the server!", GREEN);
 }
 
 public void OnPluginEnd()
@@ -416,7 +416,6 @@ public void AnnounceToChannel(char[] webhook, const char[] msg, const char[] col
 {
     DiscordWebHook hook = new DiscordWebHook(webhook);
     hook.SetUsername("Server Status");
-    hook.SetAvatar("https://wiki.teamfortress.com/w/images/d/d6/Alert.png");
 
     DiscordEmbed Embed = new DiscordEmbed();
     Embed.SetColor(color);
@@ -519,7 +518,7 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
         char chatMessage[256];
         Format(
         chatMessage, sizeof(chatMessage),
-        "*DISCORD* %s%s : %s%s", 
+        "*DISCORD* %s%s%s :  %s", 
         g_msg_varcol, discorduser, g_msg_textcol, message
         );
 
