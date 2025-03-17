@@ -1,4 +1,4 @@
-# Discord Relay
+# Discord Relay (Also compatible with [Discord Utilities ](https://github.com/Cruze03/Discord-Utilities-v2)‼)
 Discord ⇄ Server Relay for the Source Engine.
 
 # Installation
