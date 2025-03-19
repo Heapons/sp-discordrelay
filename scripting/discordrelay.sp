@@ -234,7 +234,7 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
     if (g_cvShowSteamID.BoolValue)
     {
         char messageFooter[64];
-        Format(messageFooter, sizeof(messageFooter), "%s\n-# [`%s`](http://www.steamcommunity.com/profiles/%s)", buffer, g_Players[GetClientUserId(client)].SteamID2, g_Players[userid].SteamID64);
+        Format(messageFooter, sizeof(messageFooter), "%s\n-# > `%s`", buffer, g_Players[GetClientUserId(client)].SteamID2);
         PrintToDiscordSay(client ? GetClientUserId(client) : 0, messageFooter);
     }
     else
@@ -502,8 +502,8 @@ public void OnRelayChannelReceived(DiscordBot bot, DiscordChannel channel)
     
     if (g_cvDiscordToServer.BoolValue)
     {
-		char channelName[64];
-		channel.GetName(channelName, sizeof(channelName));
+        char channelName[64];
+        channel.GetName(channelName, sizeof(channelName));
 
         g_Bot.StartListeningToChannel(channel, OnDiscordMessageSent);
         PrintToServer("Listening to #%s for messages...", channelName);
@@ -530,8 +530,8 @@ public void OnRCONChannelReceived(DiscordBot bot, DiscordChannel channel)
     
     if (g_cvRCONDiscordToServer.BoolValue)
     {
-		char channelName[64];
-		channel.GetName(channelName, sizeof(channelName));
+        char channelName[64];
+        channel.GetName(channelName, sizeof(channelName));
 
         g_Bot.StartListeningToChannel(channel, OnDiscordMessageSent);
         PrintToServer("Listening to #%s for RCON commands...", channelName);
@@ -600,7 +600,22 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
         {
             char response[2048];
             ServerCommandEx(response, sizeof(response), "%s", message);
-            Format(response, sizeof(response), "```%s\n%s\n```", g_rcon_highlight, response);
+
+            if (response[0] == '\0')
+            {
+                strcopy(response, sizeof(response), "```diff\n-Unable to print command response-\n+(But the command has been successfully executed nevertheless)+\n```");
+            }
+            else if (StrContains(response, "Unknown Command", false) == 0)
+            {
+                DiscordEmoji emoji = DiscordEmoji.FromName("🚫");
+                g_Bot.CreateReaction(chl, discordmessage, emoji);
+                //delete emoji;
+                return;
+            }
+            else
+            {
+                Format(response, sizeof(response), "```%s\n%s\n```", g_rcon_highlight, response);
+            }
             
             DiscordWebHook hook = new DiscordWebHook(g_sRCONWebhook);
             hook.SetUsername("RCON");
@@ -608,7 +623,10 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
             DiscordEmbed Embed = new DiscordEmbed();
             Embed.SetColor(BLACK);
             Embed.AddField(new DiscordEmbedField("", response, false));
-            Embed.WithFooter(new DiscordEmbedFooter(message));
+            
+            Format(message, sizeof(message), "```hs\n%s\n```", message);
+            Embed.AddField(new DiscordEmbedField("", message, false));
+            //Embed.WithFooter(new DiscordEmbedFooter(message));
 
             hook.Embed(Embed);
             hook.Send();
