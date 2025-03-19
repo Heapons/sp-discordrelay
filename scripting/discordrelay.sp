@@ -234,7 +234,7 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
     if (g_cvShowSteamID.BoolValue)
     {
         char messageFooter[64];
-        Format(messageFooter, sizeof(messageFooter), "%s\n-# > `%s`", buffer, g_Players[GetClientUserId(client)].SteamID2);
+        Format(messageFooter, sizeof(messageFooter), "%s\n-# [`%s`](http://www.steamcommunity.com/profiles/%s)", buffer, g_Players[GetClientUserId(client)].SteamID2, g_Players[userid].SteamID64);
         PrintToDiscordSay(client ? GetClientUserId(client) : 0, messageFooter);
     }
     else
