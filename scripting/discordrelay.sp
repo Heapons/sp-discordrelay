@@ -567,21 +567,21 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
         author.GetUsername(discorduser, sizeof(discorduser));
         
         char chatMessage[256];
-        if (g_msg_prefix[0] != '\0')
+        if (discordmessage.Type == REPLY)
+        {
+            Format(
+            chatMessage, sizeof(chatMessage),
+            "%s %s(Reply) %s%s :  %s", 
+            g_msg_prefix, g_msg_varcol, discorduser, g_msg_textcol, message
+            );            
+        }
+        else
         {
             Format(
             chatMessage, sizeof(chatMessage),
             "%s %s%s%s :  %s", 
             g_msg_prefix, g_msg_varcol, discorduser, g_msg_textcol, message
             );
-        }
-        else
-        {
-            Format(
-            chatMessage, sizeof(chatMessage),
-            "%s%s%s :  %s", 
-            g_msg_varcol, discorduser, g_msg_textcol, message
-            );  
         }
 
         char consoleMessage[256];
@@ -609,7 +609,6 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
             {
                 DiscordEmoji emoji = DiscordEmoji.FromName("🚫");
                 g_Bot.CreateReaction(chl, discordmessage, emoji);
-                //delete emoji;
                 return;
             }
             else
