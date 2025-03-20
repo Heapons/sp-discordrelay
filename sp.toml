@@ -18,3 +18,15 @@ path = "."
 [[dependency]]
 url = "https://github.com/KyleSanderson/SteamWorks/blob/master/Pawn/includes/SteamWorks.inc"
 path = "."
+
+[[dependency]]
+url = "https://github.com/JoinedSenses/SourceMod-IncludeLibrary/blob/master/include/multicolors.inc"
+path = "."
+
+[[dependency]]
+url = "https://github.com/sapphonie/StAC-tf2/blob/master/scripting/include/autoexecconfig.inc"
+path = "."
+
+[[dependency]]
+url = "https://github.com/ErikMinekus/sm-ripext/tree/main/pawn/scripting/include"
+path = "."
