@@ -34,7 +34,8 @@ ConVar g_cvConnectMessage;
 ConVar g_cvDisconnectMessage;
 ConVar g_cvMapChangeMessage;
 ConVar g_cvMessage;
-ConVar g_cvHideExclamMessage;
+ConVar g_cvHideCommands;
+char g_sHideCommands[64];
 ConVar g_cvShowServerTags;
 ConVar g_cvShowServerName;
 ConVar g_cvShowSteamID;
@@ -70,11 +71,11 @@ void SetupConvars()
     g_cvDisconnectMessage = AutoExecConfig_CreateConVar("discrelay_disconnectmessage", "1", "relays client disconnection messages to Discord (discrelay_servertodiscord needs to set to 1)");
     g_cvMapChangeMessage = AutoExecConfig_CreateConVar("discrelay_mapchangemessage", "1", "relays map changes to Discord (discrelay_servertodiscord needs to set to 1)");
     g_cvMessage = AutoExecConfig_CreateConVar("discrelay_message", "1", "relays client messages to Discord (discrelay_servertodiscord needs to set to 1)");
-    g_cvHideExclamMessage = AutoExecConfig_CreateConVar("discrelay_hideexclammessage", "1", "Hides any message that begins with !");
+    g_cvHideCommands = AutoExecConfig_CreateConVar("discrelay_hidecommands", "!,/", "Hides any message that begins with the specified prefixes (e.g., '!'). Separate multiple prefixes with commas.");
     g_cvShowServerTags = AutoExecConfig_CreateConVar("discrelay_showservertags", "1", "Displays sv_tags in server status");
     g_cvShowServerName = AutoExecConfig_CreateConVar("discrelay_showservername", "1", "Displays hostname in server status");
     g_cvShowSteamID = AutoExecConfig_CreateConVar("discrelay_showsteamid", "0", "Displays a Player's Steam ID below every message");
-    g_cvShowSteamID_Mode = AutoExecConfig_CreateConVar("discrelay_showsteamid_mode", "name", "Possible values: bottom, top, name, prepend, append, message");
+    g_cvShowSteamID_Mode = AutoExecConfig_CreateConVar("discrelay_showsteamid_mode", "name", "Possible values: bottom, top, name, prepend, append");
     
     // Customization
     g_cvmsg_textcol = AutoExecConfig_CreateConVar("discrelay_msg_textcol", "{default}", "Color of Discord messages");
@@ -100,6 +101,7 @@ void SetupConvars()
     g_cvmsg_varcol.GetString(g_msg_varcol, sizeof(g_msg_varcol));
     g_cvmsg_prefix.GetString(g_msg_prefix, sizeof(g_msg_prefix));
     g_cvrcon_highlight.GetString(g_rcon_highlight, sizeof(g_rcon_highlight));
+    g_cvHideCommands.GetString(g_sHideCommands, sizeof(g_sHideCommands));
     
     g_cvSteamApiKey.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvDiscordBotToken.AddChangeHook(OnDiscordRelayCvarChanged);
@@ -115,6 +117,7 @@ void SetupConvars()
     g_cvmsg_varcol.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvmsg_prefix.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvrcon_highlight.AddChangeHook(OnDiscordRelayCvarChanged);
+    g_cvHideCommands.AddChangeHook(OnDiscordRelayCvarChanged);
 }
 
 public void OnDiscordRelayCvarChanged(ConVar convar, char[] oldValue, char[] newValue)
@@ -131,4 +134,5 @@ public void OnDiscordRelayCvarChanged(ConVar convar, char[] oldValue, char[] new
     g_cvmsg_prefix.GetString(g_msg_prefix, sizeof(g_msg_prefix));
     g_cvrcon_highlight.GetString(g_rcon_highlight, sizeof(g_rcon_highlight));
     g_cvShowSteamID_Mode.GetString(g_sShowSteamID_Mode, sizeof(g_sShowSteamID_Mode));
+    g_cvHideCommands.GetString(g_sHideCommands, sizeof(g_sHideCommands));
 }

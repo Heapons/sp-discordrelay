@@ -12,7 +12,7 @@
 #include "discordrelay/convars.sp"
 #include "discordrelay/globals.sp"
 
-#define PLUGIN_VERSION "1.4.3"
+#define PLUGIN_VERSION "1.4.4"
 
 public Plugin myinfo = 
 {
@@ -73,7 +73,7 @@ public void OnClientDisconnect(int client)
     int userid = GetClientUserId(client);
     if (g_cvDisconnectMessage.BoolValue)
     {
-        PrintToDiscord(userid, RED, "disconnected");
+        PrintToDiscord(userid, CRIMSON, "disconnected");
     }
 
     Player newPlayer;
@@ -89,7 +89,7 @@ public Action OnBanClient(int client)
     int userid = GetClientUserId(client);
     if (g_cvDisconnectMessage.BoolValue)
     {
-        PrintToDiscord(userid, RED, "banned");
+        PrintToDiscord(userid, CRIMSON, "banned");
     }
 
     Player newPlayer;
@@ -130,24 +130,24 @@ public void OnMapEnd()
 
 public void OnServerEnterHibernation()
 {
-    AnnounceToChannel(g_sDiscordWebhook, "Server is currently empty!", RED);
+    AnnounceToChannel(g_sDiscordWebhook, "Server is currently empty!", CRIMSON);
 }
 
 public void OnServerExitHibernation()
 {
-    AnnounceToChannel(g_sDiscordWebhook, "Someone joined the server!", GREEN);
+    AnnounceToChannel(g_sDiscordWebhook, "Someone joined the server!", MEDIUM_SEA_GREEN);
 }
 
 public void OnPluginEnd()
 {
     if (g_ChatAnnounced)
     {
-        PrintToChannel(g_sRCONWebhook, "RCON commands relay stopped!", RED);
+        PrintToChannel(g_sRCONWebhook, "RCON commands relay stopped!", CRIMSON);
     }
 
     if (g_RCONAnnounced)
     {
-        PrintToChannel(g_sDiscordWebhook, "Chat relay stopped!", RED);
+        PrintToChannel(g_sDiscordWebhook, "Chat relay stopped!", CRIMSON);
     }
 
     OnMapEnd();
@@ -176,7 +176,7 @@ public Action Timer_ServerStart(Handle timer)
 {
     char buffer[64];
     GetCurrentMap(buffer, sizeof(buffer));
-    PrintToDiscordMapChange(buffer, GREEN);
+    PrintToDiscordMapChange(buffer, MEDIUM_SEA_GREEN);
     return Plugin_Continue;
 }
 
@@ -192,15 +192,21 @@ public Action MapEnd()
 {
     char buffer[64];
     GetCurrentMap(buffer, sizeof(buffer));
-    PrintToDiscordPreviousMap(buffer, RED);
+    PrintToDiscordPreviousMap(buffer, CRIMSON);
     return Plugin_Continue;
 }
 
 public void OnClientSayCommand_Post(int client, const char[] command, const char[] sArgs)
 {
-    if (g_cvHideExclamMessage.BoolValue && (!strncmp(sArgs, "/", 1)))
+    char prefixes[10][16];
+    int prefixCount = ExplodeString(g_sHideCommands, ",", prefixes, sizeof(prefixes), sizeof(prefixes[]));
+
+    for (int i = 0; i < prefixCount; i++)
     {
-        return;
+        if (StrContains(sArgs, prefixes[i], false) == 0)
+        {
+            return;
+        }
     }
 
     // Replace '@' character to prevent players from mentioning in Discord
@@ -210,7 +216,7 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
     {
         ReplaceString(buffer, sizeof(buffer), "@", "＠");
     }
-    // Remove '{<color>}' string from messages to prevent color tags from being sent to Discord
+    // Prevent '{color}' tags from showing up on Discord
     char colorTag[128];
     int pos = 0;
     int len = strlen(buffer);
@@ -550,7 +556,7 @@ public void OnRelayChannelReceived(DiscordBot bot, DiscordChannel channel)
         PrintToServer("Listening to #%s for messages...", channelName);
         if (!g_ChatAnnounced)
         {
-            PrintToChannel(g_sDiscordWebhook, "Listening to chat messages...", WHITE);
+            PrintToChannel(g_sDiscordWebhook, "Listening to chat messages...", GHOST_WHITE);
             g_ChatAnnounced = true;
         }
     }
@@ -578,7 +584,7 @@ public void OnRCONChannelReceived(DiscordBot bot, DiscordChannel channel)
         PrintToServer("Listening to #%s for RCON commands...", channelName);
         if (!g_RCONAnnounced)
         {
-            PrintToChannel(g_sRCONWebhook, "Listening to RCON commands...", WHITE);
+            PrintToChannel(g_sRCONWebhook, "Listening to RCON commands...", GHOST_WHITE);
             g_RCONAnnounced = true;
         }
     }
@@ -661,7 +667,7 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
             hook.SetUsername("RCON");
 
             DiscordEmbed Embed = new DiscordEmbed();
-            Embed.SetColor(BLACK);
+            Embed.SetColor(DARK_SLATE_GRAY);
             Embed.AddField(new DiscordEmbedField("", response, false));
             
             Format(message, sizeof(message), "```hs\n%s\n```", message);
