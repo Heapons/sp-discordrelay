@@ -37,11 +37,12 @@ Un-zip [`discordrelay.zip`](https://github.com/Heapons/sp-discordrelay/tags) ins
 | `discrelay_message` | Enable to allow client messages in the server to be sent to Discord. This is any message that's not a command, only exception is any ! command which can be hidden by enabling `discrelay_hideexclammessage`. |
 | `discrelay_hideexclammessage` | Hides any message that begins with ! or /, `discrelay_message` needs to be enabled for this to work. |
 | `discrelay_msg_textcol` | The color used for the message that will be sent to the server when doing Discord -> server. The plugin uses morecolors.inc to supply the colors, so when setting the cvar make sure to set it like {red} for example. Depending on the game you are using different options to set the color can be chosen such as using hex (more information [here](https://forums.alliedmods.net/showthread.php?t=247770)). |
-| `discrelay_msg_varcol` | The color used for the variable part of the message that will be sent to the server when doing Discord -> server. |
+| `discrelay_msg_varcol` | The color used for the variable part of the message that will be sent to the server when doing Discord → Server. |
 | `discrelay_msg_prefix` | The prefix for messages sent from Discord to the server. |
 | `discrelay_showservertags` | Displays `sv_tags` in server status. |
 | `discrelay_showservername` | Displays `hostname` in server status. |
 | `discrelay_rcon_highlight` | Syntax highlighting for RCON responses. See: https://highlightjs.org/demo |
 | `discrelay_showsteamid` | Displays a Player's Steam ID below every message. |
+| `discrelay_showsteamid_mode` | Possible values: `bottom`, `top`, `name`, `prepend`, `append`, `message`. |
 > [!CAUTION] 
 > **Warning to server owners:** Only let people you trust have access to the RCON channel; all messages sent in this channel are considered to be commands.

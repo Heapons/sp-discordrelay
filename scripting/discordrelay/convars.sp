@@ -38,6 +38,8 @@ ConVar g_cvHideExclamMessage;
 ConVar g_cvShowServerTags;
 ConVar g_cvShowServerName;
 ConVar g_cvShowSteamID;
+ConVar g_cvShowSteamID_Mode;
+char g_sShowSteamID_Mode[32];
 
 void SetupConvars() 
 {
@@ -72,6 +74,7 @@ void SetupConvars()
     g_cvShowServerTags = AutoExecConfig_CreateConVar("discrelay_showservertags", "1", "Displays sv_tags in server status");
     g_cvShowServerName = AutoExecConfig_CreateConVar("discrelay_showservername", "1", "Displays hostname in server status");
     g_cvShowSteamID = AutoExecConfig_CreateConVar("discrelay_showsteamid", "0", "Displays a Player's Steam ID below every message");
+    g_cvShowSteamID_Mode = AutoExecConfig_CreateConVar("discrelay_showsteamid_mode", "name", "Possible values: bottom, top, name, prepend, append, message");
     
     // Customization
     g_cvmsg_textcol = AutoExecConfig_CreateConVar("discrelay_msg_textcol", "{default}", "Color of Discord messages");
@@ -91,6 +94,7 @@ void SetupConvars()
     g_cvDiscordBotToken.GetString(g_sDiscordBotToken, sizeof(g_sDiscordBotToken));
     g_cvChannelId.GetString(g_sChannelId, sizeof(g_sChannelId));
     g_cvRCONChannelId.GetString(g_sRCONChannelId, sizeof(g_sRCONChannelId));
+    g_cvShowSteamID_Mode.GetString(g_sShowSteamID_Mode, sizeof(g_sShowSteamID_Mode));
     
     g_cvmsg_textcol.GetString(g_msg_textcol, sizeof(g_msg_textcol));
     g_cvmsg_varcol.GetString(g_msg_varcol, sizeof(g_msg_varcol));
@@ -105,6 +109,7 @@ void SetupConvars()
     g_cvDiscordServerId.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvChannelId.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvRCONChannelId.AddChangeHook(OnDiscordRelayCvarChanged);
+    g_cvShowSteamID_Mode.AddChangeHook(OnDiscordRelayCvarChanged);
     
     g_cvmsg_textcol.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvmsg_varcol.AddChangeHook(OnDiscordRelayCvarChanged);
@@ -125,4 +130,5 @@ public void OnDiscordRelayCvarChanged(ConVar convar, char[] oldValue, char[] new
     g_cvmsg_varcol.GetString(g_msg_varcol, sizeof(g_msg_varcol));
     g_cvmsg_prefix.GetString(g_msg_prefix, sizeof(g_msg_prefix));
     g_cvrcon_highlight.GetString(g_rcon_highlight, sizeof(g_rcon_highlight));
+    g_cvShowSteamID_Mode.GetString(g_sShowSteamID_Mode, sizeof(g_sShowSteamID_Mode));
 }

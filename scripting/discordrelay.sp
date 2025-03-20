@@ -233,9 +233,36 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
 
     if (g_cvShowSteamID.BoolValue)
     {
-        char messageFooter[64];
-        Format(messageFooter, sizeof(messageFooter), "%s\n-# > `%s`", buffer, g_Players[GetClientUserId(client)].SteamID2);
-        PrintToDiscordSay(client ? GetClientUserId(client) : 0, messageFooter);
+        char steamID[128];
+        if (StrEqual(g_sShowSteamID_Mode, "bottom"))
+        {
+            Format(steamID, sizeof(steamID), "%s\n-# > [`%s`](<http://www.steamcommunity.com/profiles/%s>)", buffer, g_Players[GetClientUserId(client)].SteamID2, g_Players[GetClientUserId(client)].SteamID64);
+            PrintToDiscordSay(client ? GetClientUserId(client) : 0, steamID);
+        }
+        else if (StrEqual(g_sShowSteamID_Mode, "top"))
+        {
+            Format(steamID, sizeof(steamID), "-# > [`%s`](<http://www.steamcommunity.com/profiles/%s>)\n%s", g_Players[GetClientUserId(client)].SteamID2, g_Players[GetClientUserId(client)].SteamID64, buffer);
+            PrintToDiscordSay(client ? GetClientUserId(client) : 0, steamID);
+        }
+        else if (StrEqual(g_sShowSteamID_Mode, "prepend"))
+        {
+            Format(steamID, sizeof(steamID), "[`%s`](<http://www.steamcommunity.com/profiles/%s>) : %s", g_Players[GetClientUserId(client)].SteamID2, g_Players[GetClientUserId(client)].SteamID64, buffer);
+            PrintToDiscordSay(client ? GetClientUserId(client) : 0, steamID);
+        }
+        else if (StrEqual(g_sShowSteamID_Mode, "append"))
+        {
+            Format(steamID, sizeof(steamID), "%s — [`%s`](<http://www.steamcommunity.com/profiles/%s>)", buffer, g_Players[GetClientUserId(client)].SteamID2, g_Players[GetClientUserId(client)].SteamID64);
+            PrintToDiscordSay(client ? GetClientUserId(client) : 0, steamID);
+        }
+        else if (StrEqual(g_sShowSteamID_Mode, "message"))
+        {
+            Format(steamID, sizeof(steamID), "[%s](<http://www.steamcommunity.com/profiles/%s>)", buffer, g_Players[GetClientUserId(client)].SteamID64);
+            PrintToDiscordSay(client ? GetClientUserId(client) : 0, steamID);
+        }
+        else
+        {
+            PrintToDiscordSay(client ? GetClientUserId(client) : 0, buffer);
+        }
     }
     else
     {
@@ -323,7 +350,21 @@ public void PrintToDiscordSay(int userid, const char[] msg, any...)
         }
 
         char buffer[128];
-        Format(buffer, sizeof(buffer), "%N", client);
+        if (g_cvShowSteamID.BoolValue)
+        {
+            if (StrEqual(g_sShowSteamID_Mode, "name"))
+            {
+            Format(buffer, sizeof(buffer), "%N [%s]", client, g_Players[GetClientUserId(client)].SteamID2);
+            }
+            else
+            {
+                Format(buffer, sizeof(buffer), "%N", client);
+            }
+        }
+        else
+        {
+            Format(buffer, sizeof(buffer), "%N", client);
+        }
         hook.SetUsername(buffer);
         Format(formattedMessage, sizeof(formattedMessage), "%s", msg);
         hook.SetContent(formattedMessage);
