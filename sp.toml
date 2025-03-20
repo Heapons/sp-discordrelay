@@ -1,0 +1,20 @@
+[Compile]
+plugins = [
+    "discordrelay"
+]
+
+[[dependency]]
+url = "https://github.com/Heapons/discord-api-Killstr3ak/tree/main/discord"
+path = "discord"
+
+[[dependency]]
+url = "https://github.com/Heapons/discord-api-Killstr3ak/tree/main/include"
+path = "."
+
+[[dependency]]
+url = "https://github.com/clugg/sm-json/tree/master/addons/sourcemod/scripting/include"
+path = "."
+
+[[dependency]]
+url = "https://github.com/KyleSanderson/SteamWorks/blob/master/Pawn/includes/SteamWorks.inc"
+path = "."
