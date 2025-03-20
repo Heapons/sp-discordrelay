@@ -27,7 +27,7 @@ jobs:
         id: setup_sp
         uses: rumblefrog/setup-sp@master
         with:
-          version: "1.11.x"
+          version: "1.10.x"
           version-file: ./scripting/${{ env.PLUGIN_NAME_ENV }}.sp
 
       - name: Download SourcePawn plugin dependencies
