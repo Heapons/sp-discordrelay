@@ -28,11 +28,11 @@ jobs:
         uses: rumblefrog/setup-sp@master
         with:
           version: "1.10.x"
-          version-file: ./scripting/${{ env.PLUGIN_NAME_ENV }}.
-          
+          version-file: ./scripting/${{ env.PLUGIN_NAME_ENV }}.sp
+      
       - name: Run cargo fix
-        run: cargo fix --bin "SPDependy"
-        
+        run: cargo fix --bin "SPDependy"        
+
       - name: Download SourcePawn plugin dependencies
         uses: tsuza/SPDependy@v2
         with:
