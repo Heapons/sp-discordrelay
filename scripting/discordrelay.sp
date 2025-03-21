@@ -266,7 +266,6 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
         else
         {
             colorTag[pos] = buffer[i];
-            pos++;
         }
     }
     colorTag[pos] = '\0';
