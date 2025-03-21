@@ -12,7 +12,7 @@
 #include "discordrelay/convars.sp"
 #include "discordrelay/globals.sp"
 
-#define PLUGIN_VERSION "1.4.4"
+#define PLUGIN_VERSION "1.4.5"
 
 public Plugin myinfo = 
 {
@@ -31,6 +31,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
+    LoadTranslations("discordrelay.phrases.txt");
     SetupConvars();
 
     g_ChatAnnounced = false;
@@ -49,6 +50,9 @@ public void OnPluginStart()
     if (g_cvDiscordToServer.BoolValue || g_cvRCONDiscordToServer.BoolValue)
     {
         CreateTimer(1.0, Timer_CreateBot);
+    }
+    if (g_cvServerToDiscord.BoolValue)
+    {
         CreateTimer(1.0, Timer_ServerStart);
     }
 }
@@ -73,7 +77,9 @@ public void OnClientDisconnect(int client)
     int userid = GetClientUserId(client);
     if (g_cvDisconnectMessage.BoolValue)
     {
-        PrintToDiscord(userid, CRIMSON, "disconnected");
+        char phrase[64];
+        Format(phrase, sizeof(phrase), "%T", "Player Leave", phrase);
+        PrintToDiscord(userid, g_sDisconnectMessageColor, phrase);
     }
 
     Player newPlayer;
@@ -89,7 +95,10 @@ public Action OnBanClient(int client)
     int userid = GetClientUserId(client);
     if (g_cvDisconnectMessage.BoolValue)
     {
-        PrintToDiscord(userid, CRIMSON, "banned");
+        char phrase[64];
+        g_cvBanMessageColor.GetString(color, sizeof(color));
+        Format(phrase, sizeof(phrase), "%T", "Player Banned", phrase);
+        PrintToDiscord(userid, g_sBanMessageColor, phrase);
     }
 
     Player newPlayer;
@@ -130,24 +139,46 @@ public void OnMapEnd()
 
 public void OnServerEnterHibernation()
 {
-    AnnounceToChannel(g_sDiscordWebhook, "Server is currently empty!", CRIMSON);
+    if (g_cvServerHibernation.BoolValue)
+    {
+        char phrase[64];
+        g_cvServerHibernationEnterColor.GetString(color, sizeof(color));
+        //Format(color, sizeof(color), "%T", "Hibernation Enter: HEX Color", color);
+        Format(phrase, sizeof(phrase), "%T", "Hibernation Enter", phrase);
+        AnnounceToChannel(g_sDiscordWebhook, phrase, g_sServerHibernationEnterColor);
+    }
 }
 
 public void OnServerExitHibernation()
 {
-    AnnounceToChannel(g_sDiscordWebhook, "Someone joined the server!", MEDIUM_SEA_GREEN);
+    if (g_cvServerHibernation.BoolValue)
+    {
+        char phrase[64];
+        //Format(color, sizeof(color), "%T", "Hibernation Exit: HEX Color", color);
+        Format(phrase, sizeof(phrase), "%T", "Hibernation Exit", phrase);
+        AnnounceToChannel(g_sDiscordWebhook, phrase, g_sServerHibernationExitColor);
+    }
 }
 
 public void OnPluginEnd()
 {
-    if (g_ChatAnnounced)
+    if (g_cvListenAnnounce.BoolValue)
     {
-        PrintToChannel(g_sRCONWebhook, "RCON commands relay stopped!", CRIMSON);
-    }
+        if (g_ChatAnnounced)
+        {
+            char phrase[64];
+            //Format(color, sizeof(color), "%T", "Chat Relay Stopped: HEX Color", color);
+            Format(phrase, sizeof(phrase), "%T", "Chat Relay Stopped", phrase);
+            PrintToChannel(g_sDiscordWebhook, phrase, g_sListenAnnounceColor);
+        }
 
-    if (g_RCONAnnounced)
-    {
-        PrintToChannel(g_sDiscordWebhook, "Chat relay stopped!", CRIMSON);
+        if (g_RCONAnnounced)
+        {
+            char phrase[64];
+            //Format(color, sizeof(color), "%T", "RCON Relay Stopped: HEX Color", color);
+            Format(phrase, sizeof(phrase), "%T", "RCON Relay Stopped", phrase);
+            PrintToChannel(g_sRCONWebhook, phrase, g_sListenAnnounceColor);
+        }
     }
 
     OnMapEnd();
@@ -176,7 +207,8 @@ public Action Timer_ServerStart(Handle timer)
 {
     char buffer[64];
     GetCurrentMap(buffer, sizeof(buffer));
-    PrintToDiscordMapChange(buffer, MEDIUM_SEA_GREEN);
+    //Format(color, sizeof(color), "%T", "Server Start: HEX Color", color);
+    PrintToDiscordMapChange(buffer, g_sServerStartColor);
     return Plugin_Continue;
 }
 
@@ -184,7 +216,8 @@ public Action Timer_MapStart(Handle timer)
 {
     char buffer[64];
     GetCurrentMap(buffer, sizeof(buffer));
-    PrintToDiscordMapChange(buffer, YELLOW);
+    //Format(color, sizeof(color), "%T", "Current Map: HEX Color", color);
+    PrintToDiscordMapChange(buffer, g_sCurrentMapColor);
     return Plugin_Continue;
 }
 
@@ -192,7 +225,8 @@ public Action MapEnd()
 {
     char buffer[64];
     GetCurrentMap(buffer, sizeof(buffer));
-    PrintToDiscordPreviousMap(buffer, CRIMSON);
+    //Format(color, sizeof(color), "%T", "Previous Map: HEX Color", color);
+    PrintToDiscordPreviousMap(buffer, g_sPreviousMapColor);
     return Plugin_Continue;
 }
 
@@ -231,44 +265,38 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
         }
         else
         {
-            colorTag[pos++] = buffer[i];
+            colorTag[pos] = buffer[i];
+            pos++;
         }
     }
     colorTag[pos] = '\0';
     strcopy(buffer, sizeof(buffer), colorTag);
 
-    if (g_cvShowSteamID.BoolValue)
+    char steamID[128];
+    if (StrEqual(g_sShowSteamID, "bottom"))
     {
-        char steamID[128];
-        if (StrEqual(g_sShowSteamID_Mode, "bottom"))
-        {
-            Format(steamID, sizeof(steamID), "%s\n-# > [`%s`](<http://www.steamcommunity.com/profiles/%s>)", buffer, g_Players[GetClientUserId(client)].SteamID2, g_Players[GetClientUserId(client)].SteamID64);
-            PrintToDiscordSay(client ? GetClientUserId(client) : 0, steamID);
-        }
-        else if (StrEqual(g_sShowSteamID_Mode, "top"))
-        {
-            Format(steamID, sizeof(steamID), "-# > [`%s`](<http://www.steamcommunity.com/profiles/%s>)\n%s", g_Players[GetClientUserId(client)].SteamID2, g_Players[GetClientUserId(client)].SteamID64, buffer);
-            PrintToDiscordSay(client ? GetClientUserId(client) : 0, steamID);
-        }
-        else if (StrEqual(g_sShowSteamID_Mode, "prepend"))
-        {
-            Format(steamID, sizeof(steamID), "[`%s`](<http://www.steamcommunity.com/profiles/%s>) : %s", g_Players[GetClientUserId(client)].SteamID2, g_Players[GetClientUserId(client)].SteamID64, buffer);
-            PrintToDiscordSay(client ? GetClientUserId(client) : 0, steamID);
-        }
-        else if (StrEqual(g_sShowSteamID_Mode, "append"))
-        {
-            Format(steamID, sizeof(steamID), "%s — [`%s`](<http://www.steamcommunity.com/profiles/%s>)", buffer, g_Players[GetClientUserId(client)].SteamID2, g_Players[GetClientUserId(client)].SteamID64);
-            PrintToDiscordSay(client ? GetClientUserId(client) : 0, steamID);
-        }
-        else if (StrEqual(g_sShowSteamID_Mode, "message"))
-        {
-            Format(steamID, sizeof(steamID), "[%s](<http://www.steamcommunity.com/profiles/%s>)", buffer, g_Players[GetClientUserId(client)].SteamID64);
-            PrintToDiscordSay(client ? GetClientUserId(client) : 0, steamID);
-        }
-        else
-        {
-            PrintToDiscordSay(client ? GetClientUserId(client) : 0, buffer);
-        }
+        Format(steamID, sizeof(steamID), "%s\n-# > [`%s`](<http://www.steamcommunity.com/profiles/%s>)", buffer, g_Players[GetClientUserId(client)].SteamID2, g_Players[GetClientUserId(client)].SteamID64);
+        PrintToDiscordSay(client ? GetClientUserId(client) : 0, steamID);
+    }
+    else if (StrEqual(g_sShowSteamID, "top"))
+    {
+        Format(steamID, sizeof(steamID), "-# > [`%s`](<http://www.steamcommunity.com/profiles/%s>)\n%s", g_Players[GetClientUserId(client)].SteamID2, g_Players[GetClientUserId(client)].SteamID64, buffer);
+        PrintToDiscordSay(client ? GetClientUserId(client) : 0, steamID);
+    }
+    else if (StrEqual(g_sShowSteamID, "prepend"))
+    {
+        Format(steamID, sizeof(steamID), "[`%s`](<http://www.steamcommunity.com/profiles/%s>) : %s", g_Players[GetClientUserId(client)].SteamID2, g_Players[GetClientUserId(client)].SteamID64, buffer);
+        PrintToDiscordSay(client ? GetClientUserId(client) : 0, steamID);
+    }
+    else if (StrEqual(g_sShowSteamID, "append"))
+    {
+        Format(steamID, sizeof(steamID), "%s — [`%s`](<http://www.steamcommunity.com/profiles/%s>)", buffer, g_Players[GetClientUserId(client)].SteamID2, g_Players[GetClientUserId(client)].SteamID64);
+        PrintToDiscordSay(client ? GetClientUserId(client) : 0, steamID);
+    }
+    else if (StrEqual(g_sShowSteamID, "message"))
+    {
+        Format(steamID, sizeof(steamID), "[%s](<http://www.steamcommunity.com/profiles/%s>)", buffer, g_Players[GetClientUserId(client)].SteamID64);
+        PrintToDiscordSay(client ? GetClientUserId(client) : 0, steamID);
     }
     else
     {
@@ -303,17 +331,13 @@ public void PrintToDiscord(int userid, const char[] color, const char[] msg, any
 
     if (g_Players[userid].SteamID64[0] != '\0')
     {
-        Format(playerName, sizeof(playerName), "[%N](http://www.steamcommunity.com/profiles/%s)", client, g_Players[userid].SteamID64);
+        //Format(playerName, sizeof(playerName), "%N", client, g_Players[userid].SteamID64);
         Embed.WithFooter(new DiscordEmbedFooter(g_Players[userid].SteamID2));
     }
-    else
-    {
-        Format(playerName, sizeof(playerName), "%N", client);
-    }
-    
-	
+
+    Format(playerName, sizeof(playerName), "%N", client);
     Embed.AddField(new DiscordEmbedField("", playerName, true));
-    Embed.AddField(new DiscordEmbedField("", msg, true));
+    //Embed.AddField(new DiscordEmbedField("", msg, true));
     
     hook.Embed(Embed);
     hook.Send();
@@ -344,7 +368,7 @@ public void PrintToDiscordSay(int userid, const char[] msg, any...)
 
         // Use embeds for server messages
         DiscordEmbed Embed = new DiscordEmbed();
-        Embed.SetColor(PURPLE);
+        Embed.SetColor("8650AC");
         Embed.AddField(new DiscordEmbedField("", formattedMessage, false));
         hook.Embed(Embed);
     }
@@ -356,16 +380,9 @@ public void PrintToDiscordSay(int userid, const char[] msg, any...)
         }
 
         char buffer[128];
-        if (g_cvShowSteamID.BoolValue)
+        if (StrEqual(g_sShowSteamID, "name"))
         {
-            if (StrEqual(g_sShowSteamID_Mode, "name"))
-            {
             Format(buffer, sizeof(buffer), "%N [%s]", client, g_Players[GetClientUserId(client)].SteamID2);
-            }
-            else
-            {
-                Format(buffer, sizeof(buffer), "%N", client);
-            }
         }
         else
         {
@@ -395,18 +412,20 @@ public void PrintToDiscordMapChange(const char[] map, const char[] color)
 
     if (g_cvShowServerName.BoolValue)
     {
-        char hostname[512];
-        Format(hostname, sizeof(hostname), "%s", hostname);
+        char embedHostName[64], hostname[512];
+        Format(embedHostName, sizeof(embedHostName), "%T", "Server Name", embedHostName);
+        Format(hostname, sizeof(hostname), "%T", "hostname", hostname);
         FindConVar("hostname").GetString(hostname, sizeof(hostname));
-        Embed.AddField(new DiscordEmbedField("Name:", hostname, false));
+        Embed.AddField(new DiscordEmbedField(embedHostName, hostname, false));
     }
 
     if (g_cvShowServerTags.BoolValue)
     {
-        char sv_tags[128];
+        char embedTags[64], sv_tags[128];
+        Format(embedTags, sizeof(embedTags), "%T", "Server Tags", embedTags);
         FindConVar("sv_tags").GetString(sv_tags, sizeof(sv_tags));
         Format(sv_tags, sizeof(sv_tags), "-# `%s`", sv_tags);
-        Embed.AddField(new DiscordEmbedField("Tags:", sv_tags, false));
+        Embed.AddField(new DiscordEmbedField(embedTags, sv_tags, false));
     }
     
     char mapFastDL[512];
@@ -422,22 +441,23 @@ public void PrintToDiscordMapChange(const char[] map, const char[] color)
     }
     else
     {
-        char sv_downloadurl[512];
-        FindConVar("sv_downloadurl").GetString(sv_downloadurl, sizeof(sv_downloadurl));
-        Format(mapFastDL, sizeof(mapFastDL), "[%s](%s/maps/%s.bsp)", map, sv_downloadurl, map);
+        Format(mapFastDL, sizeof(mapFastDL), "%T", "Map Name", mapFastDL);
     }
     
-    Embed.AddField(new DiscordEmbedField("Current Map:", mapFastDL, true));
+    char embedCurrentMap[64];
+    Format(embedCurrentMap, sizeof(embedCurrentMap), "%T", "Current Map", embedCurrentMap);
+    Embed.AddField(new DiscordEmbedField(embedCurrentMap, mapFastDL, true));
     
-    char buffer[512];
+    char embedPlayerCount[64], buffer[512];
+    Format(embedPlayerCount, sizeof(embedPlayerCount), "%T", "Player Count", embedPlayerCount);
     Format(buffer, sizeof(buffer), "%d/%d", GetOnlinePlayers(), GetMaxHumanPlayers());
-    Embed.AddField(new DiscordEmbedField("Player Count:", buffer, true));
+    Embed.AddField(new DiscordEmbedField(embedPlayerCount, buffer, true));
     
     hook.Embed(Embed);
     hook.Send();
     delete hook;
 }
-
+/////////////////////////////////////////////////////////////////////
 public void PrintToDiscordPreviousMap(const char[] map, const char[] color)
 {
     if (!g_cvServerToDiscord.BoolValue || !g_cvMapChangeMessage.BoolValue)
@@ -453,18 +473,20 @@ public void PrintToDiscordPreviousMap(const char[] map, const char[] color)
 
     if (g_cvShowServerName.BoolValue)
     {
-        char hostname[512];
-        Format(hostname, sizeof(hostname), "%s", hostname);
+        char embedHostName[64], hostname[512];
+        Format(embedHostName, sizeof(embedHostName), "%T", "Server Name", embedHostName);
+        Format(hostname, sizeof(hostname), "%T", "hostname", hostname);
         FindConVar("hostname").GetString(hostname, sizeof(hostname));
-        Embed.AddField(new DiscordEmbedField("Name:", hostname, false));
+        Embed.AddField(new DiscordEmbedField(embedHostName, hostname, false));
     }
 
     if (g_cvShowServerTags.BoolValue)
     {
-        char sv_tags[128];
+        char embedTags[64], sv_tags[128];
+        Format(embedTags, sizeof(embedTags), "%T", "Server Tags", embedTags);
         FindConVar("sv_tags").GetString(sv_tags, sizeof(sv_tags));
         Format(sv_tags, sizeof(sv_tags), "-# `%s`", sv_tags);
-        Embed.AddField(new DiscordEmbedField("Tags:", sv_tags, false));
+        Embed.AddField(new DiscordEmbedField(embedTags, sv_tags, false));
     }
 
     char mapFastDL[512];
@@ -480,12 +502,12 @@ public void PrintToDiscordPreviousMap(const char[] map, const char[] color)
     }
     else
     {
-        char sv_downloadurl[512];
-        FindConVar("sv_downloadurl").GetString(sv_downloadurl, sizeof(sv_downloadurl));
-        Format(mapFastDL, sizeof(mapFastDL), "[%s](%s/maps/%s.bsp)", map, sv_downloadurl, map);
+        Format(mapFastDL, sizeof(mapFastDL), "%T", "Map Name", mapFastDL);
     }
     
-    Embed.AddField(new DiscordEmbedField("Previous Map:", mapFastDL, true));
+    char embedPreviousMap[64];
+    Format(embedPreviousMap, sizeof(embedPreviousMap), "%T", "Previous Map", embedPreviousMap);
+    Embed.AddField(new DiscordEmbedField(embedPreviousMap, mapFastDL, true));
     
     hook.Embed(Embed);
     hook.Send();
@@ -553,10 +575,19 @@ public void OnRelayChannelReceived(DiscordBot bot, DiscordChannel channel)
         channel.GetName(channelName, sizeof(channelName));
 
         g_Bot.StartListeningToChannel(channel, OnDiscordMessageSent);
-        PrintToServer("Listening to #%s for messages...", channelName);
+        if (g_cvListenAnnounce.BoolValue)
+        {
+            PrintToServer("Listening to #%s for messages...", channelName);
+        }
         if (!g_ChatAnnounced)
         {
-            PrintToChannel(g_sDiscordWebhook, "Listening to chat messages...", GHOST_WHITE);
+            if (g_cvListenAnnounce.BoolValue)
+            {
+                char phrase[64];
+                //Format(color, sizeof(color), "%T", "Listening to Chat: HEX Color", color);
+                Format(phrase, sizeof(phrase), "%T", "Listening to Chat", phrase);
+                PrintToChannel(g_sDiscordWebhook, phrase, g_sListenAnnounceColor);
+            }
             g_ChatAnnounced = true;
         }
     }
@@ -584,7 +615,13 @@ public void OnRCONChannelReceived(DiscordBot bot, DiscordChannel channel)
         PrintToServer("Listening to #%s for RCON commands...", channelName);
         if (!g_RCONAnnounced)
         {
-            PrintToChannel(g_sRCONWebhook, "Listening to RCON commands...", GHOST_WHITE);
+            if (g_cvListenAnnounce.BoolValue)
+            {
+                char phrase[64];
+                //Format(color, sizeof(color), "%T", "Listening to RCON: HEX Color", color);
+                Format(phrase, sizeof(phrase), "%T", "Listening to RCON", phrase);
+                PrintToChannel(g_sRCONWebhook, phrase, g_sListenAnnounceColor);
+            }
             g_RCONAnnounced = true;
         }
     }
@@ -618,21 +655,21 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
         {
             Format(
             chatMessage, sizeof(chatMessage),
-            "%s %s(Reply) %s%s :  %s", 
-            g_msg_prefix, g_msg_varcol, discorduser, g_msg_textcol, message
+            "%T", "Discord To Server (Reply)",
+            discorduser, message
             );            
         }
         else
         {
             Format(
             chatMessage, sizeof(chatMessage),
-            "%s %s%s%s :  %s", 
-            g_msg_prefix, g_msg_varcol, discorduser, g_msg_textcol, message
+            "%T", "Discord To Server",
+            discorduser, message
             );
         }
 
         char consoleMessage[256];
-        Format(consoleMessage, sizeof(consoleMessage), "%s %s: %s", g_msg_prefix, discorduser, message);
+        Format(consoleMessage, sizeof(consoleMessage), "%T", "Discord To Server", discorduser, message);
 
         CPrintToChatAll(chatMessage);
         PrintToServer(consoleMessage);
@@ -650,7 +687,7 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
 
             if (response[0] == '\0')
             {
-                strcopy(response, sizeof(response), "```diff\n-Unable to print command response-\n+(But the command has been successfully executed nevertheless)+\n```");
+                Format(response, sizeof(response), "%T", "RCON: Print Error", response);
             }
             else if (StrContains(response, "Unknown Command", false) == 0)
             {
@@ -660,17 +697,19 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
             }
             else
             {
-                Format(response, sizeof(response), "```%s\n%s\n```", g_rcon_highlight, response);
+                Format(response, sizeof(response), "%T", "RCON: Output", response);
             }
             
             DiscordWebHook hook = new DiscordWebHook(g_sRCONWebhook);
             hook.SetUsername("RCON");
 
             DiscordEmbed Embed = new DiscordEmbed();
-            Embed.SetColor(DARK_SLATE_GRAY);
+            
+            //Format(color, sizeof(color), "%T", "RCON: Output: HEX Color", color);
+            Embed.SetColor(g_sPrintRCONResponseColor);
             Embed.AddField(new DiscordEmbedField("", response, false));
             
-            Format(message, sizeof(message), "```hs\n%s\n```", message);
+            Format(message, sizeof(message), "%T", "RCON: Input", message);
             Embed.AddField(new DiscordEmbedField("", message, false));
             //Embed.WithFooter(new DiscordEmbedFooter(message));
 
