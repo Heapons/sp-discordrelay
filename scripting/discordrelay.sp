@@ -78,7 +78,7 @@ public void OnClientDisconnect(int client)
     if (g_cvDisconnectMessage.BoolValue)
     {
         char phrase[64];
-        Format(phrase, sizeof(phrase), "%T", "Player Leave", phrase);
+        Format(phrase, sizeof(phrase), "%T", "Player Leave", LANG_SERVER, client);
         PrintToDiscord(userid, g_sDisconnectMessageColor, phrase);
     }
 
@@ -95,9 +95,10 @@ public Action OnBanClient(int client)
     int userid = GetClientUserId(client);
     if (g_cvDisconnectMessage.BoolValue)
     {
+		//g_cvBanMessageColor.GetString(g_sBanMessageColor, sizeof(g_sBanMessageColor));
+        
         char phrase[64];
-        g_cvBanMessageColor.GetString(color, sizeof(color));
-        Format(phrase, sizeof(phrase), "%T", "Player Banned", phrase);
+		Format(phrase, sizeof(phrase), "%T", "Player Banned", LANG_SERVER, client);
         PrintToDiscord(userid, g_sBanMessageColor, phrase);
     }
 
@@ -142,9 +143,8 @@ public void OnServerEnterHibernation()
     if (g_cvServerHibernation.BoolValue)
     {
         char phrase[64];
-        g_cvServerHibernationEnterColor.GetString(color, sizeof(color));
         //Format(color, sizeof(color), "%T", "Hibernation Enter: HEX Color", color);
-        Format(phrase, sizeof(phrase), "%T", "Hibernation Enter", phrase);
+        Format(phrase, sizeof(phrase), "%T", "Hibernation Enter", LANG_SERVER);
         AnnounceToChannel(g_sDiscordWebhook, phrase, g_sServerHibernationEnterColor);
     }
 }
@@ -155,7 +155,7 @@ public void OnServerExitHibernation()
     {
         char phrase[64];
         //Format(color, sizeof(color), "%T", "Hibernation Exit: HEX Color", color);
-        Format(phrase, sizeof(phrase), "%T", "Hibernation Exit", phrase);
+        Format(phrase, sizeof(phrase), "%T", "Hibernation Exit", LANG_SERVER);
         AnnounceToChannel(g_sDiscordWebhook, phrase, g_sServerHibernationExitColor);
     }
 }
@@ -168,7 +168,7 @@ public void OnPluginEnd()
         {
             char phrase[64];
             //Format(color, sizeof(color), "%T", "Chat Relay Stopped: HEX Color", color);
-            Format(phrase, sizeof(phrase), "%T", "Chat Relay Stopped", phrase);
+            Format(phrase, sizeof(phrase), "%T", "Chat Relay Stopped", LANG_SERVER);
             PrintToChannel(g_sDiscordWebhook, phrase, g_sListenAnnounceColor);
         }
 
@@ -176,7 +176,7 @@ public void OnPluginEnd()
         {
             char phrase[64];
             //Format(color, sizeof(color), "%T", "RCON Relay Stopped: HEX Color", color);
-            Format(phrase, sizeof(phrase), "%T", "RCON Relay Stopped", phrase);
+            Format(phrase, sizeof(phrase), "%T", "RCON Relay Stopped", LANG_SERVER);
             PrintToChannel(g_sRCONWebhook, phrase, g_sListenAnnounceColor);
         }
     }
@@ -412,16 +412,16 @@ public void PrintToDiscordMapChange(const char[] map, const char[] color)
     if (g_cvShowServerName.BoolValue)
     {
         char embedHostName[64], hostname[512];
-        Format(embedHostName, sizeof(embedHostName), "%T", "Server Name", embedHostName);
-        Format(hostname, sizeof(hostname), "%T", "hostname", hostname);
+        Format(embedHostName, sizeof(embedHostName), "%T", "Server Name", LANG_SERVER);
         FindConVar("hostname").GetString(hostname, sizeof(hostname));
+        //Format(hostname, sizeof(hostname), "%T", "hostname", LANG_SERVER, hostname);
         Embed.AddField(new DiscordEmbedField(embedHostName, hostname, false));
     }
 
     if (g_cvShowServerTags.BoolValue)
     {
         char embedTags[64], sv_tags[128];
-        Format(embedTags, sizeof(embedTags), "%T", "Server Tags", embedTags);
+        Format(embedTags, sizeof(embedTags), "%T", "Server Tags", LANG_SERVER);
         FindConVar("sv_tags").GetString(sv_tags, sizeof(sv_tags));
         Format(sv_tags, sizeof(sv_tags), "-# `%s`", sv_tags);
         Embed.AddField(new DiscordEmbedField(embedTags, sv_tags, false));
@@ -438,17 +438,17 @@ public void PrintToDiscordMapChange(const char[] map, const char[] color)
 
         Format(mapFastDL, sizeof(mapFastDL), "[%s](https://steamcommunity.com/sharedfiles/filedetails/?id=%s)", mapName[0], mapName[1]);
     }
-    else
+    /* else
     {
-        Format(mapFastDL, sizeof(mapFastDL), "%T", "Map Name", mapFastDL);
-    }
+        Format(mapFastDL, sizeof(mapFastDL), "%T", "Map Name", LANG_SERVER, mapFastDL, " ");
+    } */
     
     char embedCurrentMap[64];
-    Format(embedCurrentMap, sizeof(embedCurrentMap), "%T", "Current Map", embedCurrentMap);
+    Format(embedCurrentMap, sizeof(embedCurrentMap), "%T", "Current Map", LANG_SERVER);
     Embed.AddField(new DiscordEmbedField(embedCurrentMap, mapFastDL, true));
     
     char embedPlayerCount[64], buffer[512];
-    Format(embedPlayerCount, sizeof(embedPlayerCount), "%T", "Player Count", embedPlayerCount);
+    Format(embedPlayerCount, sizeof(embedPlayerCount), "%T", "Player Count", LANG_SERVER);
     Format(buffer, sizeof(buffer), "%d/%d", GetOnlinePlayers(), GetMaxHumanPlayers());
     Embed.AddField(new DiscordEmbedField(embedPlayerCount, buffer, true));
     
@@ -470,19 +470,19 @@ public void PrintToDiscordPreviousMap(const char[] map, const char[] color)
     DiscordEmbed Embed = new DiscordEmbed();
     Embed.SetColor(color);
 
-    if (g_cvShowServerName.BoolValue)
+   	if(g_cvShowServerName.BoolValue)
     {
         char embedHostName[64], hostname[512];
-        Format(embedHostName, sizeof(embedHostName), "%T", "Server Name", embedHostName);
-        Format(hostname, sizeof(hostname), "%T", "hostname", hostname);
+        Format(embedHostName, sizeof(embedHostName), "%T", "Server Name", LANG_SERVER);
         FindConVar("hostname").GetString(hostname, sizeof(hostname));
+        //Format(hostname, sizeof(hostname), "%T", "hostname", LANG_SERVER, hostname);
         Embed.AddField(new DiscordEmbedField(embedHostName, hostname, false));
     }
 
-    if (g_cvShowServerTags.BoolValue)
+    if(g_cvShowServerTags.BoolValue)
     {
         char embedTags[64], sv_tags[128];
-        Format(embedTags, sizeof(embedTags), "%T", "Server Tags", embedTags);
+        Format(embedTags, sizeof(embedTags), "%T", "Server Tags", LANG_SERVER);
         FindConVar("sv_tags").GetString(sv_tags, sizeof(sv_tags));
         Format(sv_tags, sizeof(sv_tags), "-# `%s`", sv_tags);
         Embed.AddField(new DiscordEmbedField(embedTags, sv_tags, false));
@@ -499,13 +499,13 @@ public void PrintToDiscordPreviousMap(const char[] map, const char[] color)
 
         Format(mapFastDL, sizeof(mapFastDL), "[%s](https://steamcommunity.com/sharedfiles/filedetails/?id=%s)", mapName[0], mapName[1]);
     }
-    else
+    /* else
     {
         Format(mapFastDL, sizeof(mapFastDL), "%T", "Map Name", mapFastDL);
-    }
+    } */
     
     char embedPreviousMap[64];
-    Format(embedPreviousMap, sizeof(embedPreviousMap), "%T", "Previous Map", embedPreviousMap);
+    Format(embedPreviousMap, sizeof(embedPreviousMap), "%T", "Previous Map", LANG_SERVER);
     Embed.AddField(new DiscordEmbedField(embedPreviousMap, mapFastDL, true));
     
     hook.Embed(Embed);
@@ -584,7 +584,7 @@ public void OnRelayChannelReceived(DiscordBot bot, DiscordChannel channel)
             {
                 char phrase[64];
                 //Format(color, sizeof(color), "%T", "Listening to Chat: HEX Color", color);
-                Format(phrase, sizeof(phrase), "%T", "Listening to Chat", phrase);
+                Format(phrase, sizeof(phrase), "%T", "Listening to Chat", LANG_SERVER);
                 PrintToChannel(g_sDiscordWebhook, phrase, g_sListenAnnounceColor);
             }
             g_ChatAnnounced = true;
@@ -618,7 +618,7 @@ public void OnRCONChannelReceived(DiscordBot bot, DiscordChannel channel)
             {
                 char phrase[64];
                 //Format(color, sizeof(color), "%T", "Listening to RCON: HEX Color", color);
-                Format(phrase, sizeof(phrase), "%T", "Listening to RCON", phrase);
+                Format(phrase, sizeof(phrase), "%T", "Listening to RCON", LANG_SERVER);
                 PrintToChannel(g_sRCONWebhook, phrase, g_sListenAnnounceColor);
             }
             g_RCONAnnounced = true;
@@ -654,7 +654,7 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
         {
             Format(
             chatMessage, sizeof(chatMessage),
-            "%T", "Discord To Server (Reply)",
+            "%T", "Discord To Server Reply", LANG_SERVER,
             discorduser, message
             );            
         }
@@ -662,13 +662,13 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
         {
             Format(
             chatMessage, sizeof(chatMessage),
-            "%T", "Discord To Server",
+            "%T", "Discord To Server", LANG_SERVER,
             discorduser, message
             );
         }
 
         char consoleMessage[256];
-        Format(consoleMessage, sizeof(consoleMessage), "%T", "Discord To Server", discorduser, message);
+        Format(consoleMessage, sizeof(consoleMessage), "%T", "Discord To Server", LANG_SERVER, discorduser, message);
 
         CPrintToChatAll(chatMessage);
         PrintToServer(consoleMessage);
@@ -686,7 +686,7 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
 
             if (response[0] == '\0')
             {
-                Format(response, sizeof(response), "%T", "RCON: Print Error", response);
+                Format(response, sizeof(response), "%T", "RCON Print Error", LANG_SERVER);
             }
             else if (StrContains(response, "Unknown Command", false) == 0)
             {
@@ -696,7 +696,7 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
             }
             else
             {
-                Format(response, sizeof(response), "%T", "RCON: Output", response);
+                Format(response, sizeof(response), "%T", "RCON Output", LANG_SERVER, response);
             }
             
             DiscordWebHook hook = new DiscordWebHook(g_sRCONWebhook);
@@ -708,7 +708,7 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
             Embed.SetColor(g_sPrintRCONResponseColor);
             Embed.AddField(new DiscordEmbedField("", response, false));
             
-            Format(message, sizeof(message), "%T", "RCON: Input", message);
+            Format(message, sizeof(message), "%T", "RCON Input", LANG_SERVER, message);
             Embed.AddField(new DiscordEmbedField("", message, false));
             //Embed.WithFooter(new DiscordEmbedFooter(message));
 
