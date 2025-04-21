@@ -39,8 +39,6 @@ char g_sPreviousMapColor[32];
 ConVar g_cvServerStartColor;
 char g_sServerStartColor[32];
 ConVar g_cvServerHibernation;
-ConVar g_cvServerHibernationColor;
-char g_sServerHibernationColor[32];
 
 ConVar g_cvServerMessage;
 ConVar g_cvServerMessageColor;
@@ -52,8 +50,6 @@ ConVar g_cvDisconnectMessage;
 ConVar g_cvDisconnectMessageColor;
 char g_sDisconnectMessageColor[32];
 ConVar g_cvMapChangeMessage;
-ConVar g_cvMapChangeMessageColor;
-char g_sMapChangeMessageColor[32];
 ConVar g_cvMessage;
 ConVar g_cvHideCommands;
 char g_sHideCommands[64];
@@ -120,6 +116,7 @@ void SetupConvars()
     g_cvHideCommands.AddChangeHook(OnDiscordRelayCvarChanged);
 
     // Colors
+    g_cvServerMessageColor = AutoExecConfig_CreateConVar("discrelay_servermessage_color", "8650AC", "HEX color for console messages");
     g_cvListenAnnounceColor = AutoExecConfig_CreateConVar("discrelay_listenannounce_color", "F8F8FF", "HEX color for the listening message");
     g_cvServerHibernationEnterColor = AutoExecConfig_CreateConVar("discrelay_serverhibernation_enter_color", "DC143C", "HEX color for the server hibernation message");
     g_cvServerHibernationExitColor = AutoExecConfig_CreateConVar("discrelay_serverhibernation_exit_color", "3CB371", "HEX color for the server hibernation message");
@@ -132,6 +129,7 @@ void SetupConvars()
     g_cvPrintRCONResponseColor = AutoExecConfig_CreateConVar("discrelay_rcon_printresponse_color", "2F4F4F", "HEX color for the RCON response message");
     g_cvServerStartColor = AutoExecConfig_CreateConVar("discrelay_serverstart_color", "3CB371", "HEX color for the server start message");
     
+    g_cvServerMessageColor.GetString(g_sServerMessageColor, sizeof(g_sServerMessageColor));
     g_cvListenAnnounceColor.GetString(g_sListenAnnounceColor, sizeof(g_sListenAnnounceColor));
     g_cvServerHibernationEnterColor.GetString(g_sServerHibernationEnterColor, sizeof(g_sServerHibernationEnterColor));
     g_cvServerHibernationExitColor.GetString(g_sServerHibernationExitColor, sizeof(g_sServerHibernationExitColor));
@@ -140,7 +138,6 @@ void SetupConvars()
     g_cvDisconnectMessageColor.GetString(g_sDisconnectMessageColor, sizeof(g_sDisconnectMessageColor));
     g_cvBanMessageColor.GetString(g_sBanMessageColor, sizeof(g_sBanMessageColor));
     g_cvCurrentMapColor.GetString(g_sCurrentMapColor, sizeof(g_sCurrentMapColor));
-    g_cvPreviousMapColor.GetString(g_sPreviousMapColor, sizeof(g_sPreviousMapColor));
     g_cvPreviousMapColor.GetString(g_sPreviousMapColor, sizeof(g_sPreviousMapColor));
     g_cvPrintRCONResponseColor.GetString(g_sPrintRCONResponseColor, sizeof(g_sPrintRCONResponseColor));
     g_cvServerStartColor.GetString(g_sServerStartColor, sizeof(g_sServerStartColor));

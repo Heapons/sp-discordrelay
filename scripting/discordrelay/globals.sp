@@ -34,11 +34,9 @@ void GetSteamID(int userid)
         {
             if (g_cvConnectMessage.BoolValue)
             {
-                char color[32], phrase[64];
-                g_cvConnectMessageColor.GetString(color, sizeof(color));
-                //Format(color, sizeof(color), "%T", "Player Join: HEX Color", color);
-                Format(phrase, sizeof(phrase), "%T", "Player Join", phrase);
-                PrintToDiscord(userid, color, phrase);
+                char phrase[64];
+                Format(phrase, sizeof(phrase), "%T", "Player Join", LANG_SERVER, userid);
+                PrintToDiscord(userid, g_sConnectMessageColor, phrase);
             }
         }
     }
@@ -78,11 +76,9 @@ stock void SteamResponse_Callback(HTTPResponse response, int userid)
         LogError("SteamAPI request fail, HTTPSResponse code %i", response.Status);
         if (g_cvConnectMessage.BoolValue)
         {
-            char color[32], phrase[64];
-            g_cvConnectMessageColor.GetString(color, sizeof(color));
-            //Format(color, sizeof(color), "%T", "Player Join: HEX Color", color);
-            Format(phrase, sizeof(phrase), "%T", "Player Join", phrase);
-            PrintToDiscord(userid, color, phrase);
+            char phrase[64];
+            Format(phrase, sizeof(phrase), "%T", "Player Join", LANG_SERVER, userid);
+            PrintToDiscord(userid, g_sConnectMessageColor, phrase);
         }
         return;
     }
@@ -101,10 +97,8 @@ stock void SteamResponse_Callback(HTTPResponse response, int userid)
     
     if (g_cvConnectMessage.BoolValue)
     {
-        char color[32], phrase[64];
-        g_cvConnectMessageColor.GetString(color, sizeof(color));
-        //Format(color, sizeof(color), "%T", "Player Join: HEX Color", color);
-        Format(phrase, sizeof(phrase), "%T", "Player Join", phrase);
-        PrintToDiscord(userid, color, phrase);
+        char phrase[64];
+        Format(phrase, sizeof(phrase), "%T", "Player Join", LANG_SERVER, userid);
+        PrintToDiscord(userid, g_sConnectMessageColor, phrase);
     }
 }
