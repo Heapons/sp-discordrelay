@@ -24,10 +24,6 @@ url = "https://github.com/JoinedSenses/SourceMod-IncludeLibrary/blob/master/incl
 path = "."
 
 [[dependency]]
-url = "https://github.com/JoinedSenses/SourceMod-IncludeLibrary/tree/master/include/multicolors
-path = "."
-
-[[dependency]]
 url = "https://github.com/sapphonie/StAC-tf2/blob/master/scripting/include/autoexecconfig.inc"
 path = "."
 

@@ -1,4 +1,4 @@
-name: Compile & Release
+name: Compile
 
 on:
   push:
@@ -59,16 +59,16 @@ jobs:
           zip -qq -y -r ${{ github.event.repository.name }}-${{ steps.setup_sp.outputs.plugin-version }}.zip configs plugins scripting extensions gamedata translations data
         working-directory: ${{ env.SCRIPTS_PATH }}
 
-      - name: Create Release
-        uses: ncipollo/release-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: v${{ steps.setup_sp.outputs.plugin-version }}
-          artifacts: "./${{ github.event.repository.name }}-${{ steps.setup_sp.outputs.plugin-version }}.zip"
-          body: ${{ steps.changelog.outputs.changes }}
-          draft: false
-          allowUpdates: true
-          prerelease: false
-          replacesArtifacts: true
+      #- name: Create Release
+      #  uses: ncipollo/release-action@v1
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #  with:
+      #    token: ${{ secrets.GITHUB_TOKEN }}
+      #    tag: v${{ steps.setup_sp.outputs.plugin-version }}
+      #    artifacts: "./${{ github.event.repository.name }}-${{ steps.setup_sp.outputs.plugin-version }}.zip"
+      #    body: ${{ steps.changelog.outputs.changes }}
+      #    draft: false
+      #    allowUpdates: true
+      #    prerelease: false
+      #    replacesArtifacts: true
