@@ -2,13 +2,14 @@
 Discord ⇄ Server Relay for the Source Engine.
 
 # Installation
-Un-zip [`discordrelay.zip`](https://github.com/Heapons/sp-discordrelay/releases) inside of `<game>/addons/sourcemod/plugins/...` and update convars in `/cfg/sourcemod/discordrelay.cfg` after running the plugin.
+Download the plugin from [releases](https://github.com/Heapons/sp-discordrelay/releases), put the `.smx` in `<game>/addons/sourcemod/plugins/...`, and edit the convars in `/cfg/sourcemod/discordrelay.cfg` after loading the plugin for the first time.
 
 # Dependencies
 (Requires [Sourcemod 1.10](https://www.sourcemod.net/downloads.php?branch=1.10-dev) to Compile!)
-- [SteamWorks](https://forums.alliedmods.net/showthread.php?t=229556)
+- [SteamWorks](https://github.com/KyleSanderson/SteamWorks/blob/master/Pawn/includes/SteamWorks.inc)
 - [Discord API](https://github.com/Heapons/discord-api-Killstr3ak)
-- [REST in Pawn](https://forums.alliedmods.net/showthread.php?t=298024)
+- [REST in Pawn](https://github.com/ErikMinekus/sm-ripext/tree/main/pawn/scripting/include)
+- [AutoExecConfig](https://github.com/Impact123/AutoExecConfig)
 
 > [!NOTE]
 > If you plan to send messages/requests to the server from discord ensure you have Message Intents enabled in the app dashboard.
@@ -18,43 +19,66 @@ Un-zip [`discordrelay.zip`](https://github.com/Heapons/sp-discordrelay/releases)
 # Configuration
 ## ConVars
 ### General Settings
-| Cvar | Description |
-|------|-------------|
-| `discrelay_steamapikey` | This will be your steam API key which you can find at [Steam API Key](https://steamcommunity.com/dev/apikey). The key is used to grab the client's steam avatar. |
-| `discrelay_discordbottoken` | Your discord bot token found/created by going to [Discord Developers](https://discord.com/developers/applications), creating an application, creating a bot, and copying the bot token. *You do not need the bot to be running, just having it in your server will work.* |
-| `discrelay_discordserverid` | Enable Developer Mode in Discord, right click on the server name in the top left and click Copy ID. Required for communication between Discord and Source. |
-| `discrelay_channelid` | Enable Developer Mode in Discord, right click on the channel name and click Copy ID. This is the channel messages will appear in. |
-| `discrelay_discordwebhook` | Set this to your Discord channel's webhook URL. You can create one by going to your Discord server, entering a text channel's settings, then in integrations create a webhook and copy the URL. |
-| `discrelay_rcon_channelid` | Discord channel ID for where RCON commands should be sent. |
-| `discrelay_rcon_webhook` | Webhook for RCON response. |
-> [!CAUTION] 
-> **Warning to server owners:** Only let people you trust have access to the RCON channel; all messages sent in this channel are considered to be commands.
+| Cvar | Default | Description |
+|------|---------|-------------|
+| `discrelay_steamapikey` || Your Steam API key (needed for `discrelay_servertodiscordavatars`). |
+| `discrelay_discordbottoken` || Your Discord bot token from the [Discord Developer Portal](https://discord.com/developers/applications) (needed for `discrelay_discordtoserver`). |
+| `discrelay_discordwebhook` || Webhook for Discord channel (needed for `discrelay_servertodiscord`). |
+| `discrelay_discordserverid` || Discord Server ID, required for Discord to server. |
+| `discrelay_channelid` || Channel ID for Discord to server (the channel where the plugin checks for messages to send to the server). |
+| `discrelay_rcon_channelid` || Channel ID where RCON commands should be sent. |
+| `discrelay_rcon_webhook` || Webhook for RCON responses (required for `discrelay_rcon_printresponse`). |
+| `discrelay_adminrole` || Role to mention on Discord for `sm_calladmin`. |
+| `discrelay_admin_webhook` || Webhook for admin call notifications. |
+| `discrelay_serverhibernation_webhook` || Webhook for server hibernation notifications. |
+| `discrelay_mapstatus_webhook` || Webhook for map status (current/previous map) notifications. |
+| `discrelay_listenchat_webhook` || Webhook for listening to chat notifications. |
+| `discrelay_listenrcon_webhook` || Webhook for listening to RCON notifications. |
 
-### Chat Settings
-| Cvar | Description |
-|------|-------------|
-| `discrelay_servertodiscord` | Enable to allow messages sent in the server to be sent through Discord via webhook. |
-| `discrelay_discordtoserver` | Enable to allow messages sent in Discord to be sent to the server. |
-| `discrelay_servertodiscordavatars` | Change avatar in messages sent to Discord to the client's Steam avatar. Requires a valid Steam API key. |
-| `discrelay_message` | Enable to allow client messages in the server to be sent to Discord. This is any message that's not a command, only exception is any ! command which can be hidden by enabling `discrelay_hideexclammessage`. |
-| `discrelay_hidecommands` | Hides any message that begins with the specified command prefixes (e.g., `!`). Separated by commas. |
-| `discrelay_msg_varcol` | The color used for the variable part of the message that will be sent to the server when doing Discord → Server. |
-| `discrelay_msg_prefix` | The prefix for messages sent from Discord to the server. |
-| `discrelay_showsteamid` | Displays a Player's Steam ID below every message. |
-| `discrelay_showsteamid_mode` | Possible values: `bottom`, `top`, `name`, `prepend`, `append`, `message`. |
+### Feature Switches
+| Cvar | Default | Description |
+|------|---------|-------------|
+| `discrelay_servertodiscord` | `1` | Enables messages sent in the server to be forwarded to Discord. |
+| `discrelay_discordtoserver` | `1` | Enables messages sent in Discord to be forwarded to the server (`discrelay_discordbottoken` and `discrelay_discordserverid` must be set). |
+| `discrelay_servertodiscordavatars` | `1` | Changes webhook avatar to client's Steam avatar (`discrelay_steamapikey` required). |
+| `discrelay_rcon_enabled` | `0` | Enables RCON functionality. |
+| `discrelay_rcon_printresponse` | `1` | Prints response from command (`discrelay_rcon_webhook` required). |
+| `discrelay_listenannounce` | `1` | Prints a message when the plugin is listening for messages. |
+| `discrelay_serverhibernation` | `1` | Prints a message whenever the server enters/exits hibernation. |
 
-### RCON Settings
-| Cvar | Description |
-|------|-------------|
-| `discrelay_rcon_enabled` | Enable RCON functionality. |
-| `discrelay_rcon_printreponse` | Prints server response to the command. |
-| `discrelay_rcon_highlight` | Syntax highlighting for RCON responses. See: https://highlightjs.org/demo |
+### Message Switches
+| Cvar | Default | Description |
+|------|---------|-------------|
+| `discrelay_servermessage` | `1` | Prints server say commands to Discord (`discrelay_servertodiscord` required). |
+| `discrelay_connectmessage` | `1` | Relays client connection to Discord (`discrelay_servertodiscord` required). |
+| `discrelay_disconnectmessage` | `1` | Relays client disconnection messages to Discord (`discrelay_servertodiscord` required). |
+| `discrelay_mapchangemessage` | `1` | Relays map changes to Discord (`discrelay_servertodiscord` required). |
+| `discrelay_message` | `1` | Relays client messages to Discord (`discrelay_servertodiscord` required). |
+| `discrelay_hidecommands` | `!,/` | Hides any message that begins with the specified prefixes (e.g., `!`). Separate multiple prefixes with commas. |
+| `discrelay_showservertags` | `1` | Displays `sv_tags` in server status. |
+| `discrelay_showservername` | `1` | Displays hostname in server status. |
+| `discrelay_showsteamid` | `name` | Shows the client's Steam ID. Possible values: `bottom`, `top`, `name`, `prepend`, `append` (or leave blank to hide it). |
+| `discrelay_adminrole` || Role to mention on Discord for `sm_calladmin`. |
+| `discrelay_admin_webhook` || Webhook for admin call notifications. |
 
-### Server Status Settings
-| Cvar | Description |
-|------|-------------|
-| `discrelay_showservertags` | Displays `sv_tags` in server status. |
-| `discrelay_showservername` | Displays `hostname` in server status. |
-| `discrelay_connectmessage` | Send client connection messages to Discord. |
-| `discrelay_disconnectmessage` | Send client disconnection messages to Discord. |
-| `discrelay_mapchangemessage` | Send map change messages to Discord. |
+### Colors
+| Cvar | Default | Description |
+|------|---------|-------------|
+| `discrelay_servermessage_color` | `8650AC` | HEX color for console messages. |
+| `discrelay_listenannounce_color` | `F8F8FF` | HEX color for the listening message. |
+| `discrelay_serverhibernation_enter_color` | `DC143C` | HEX color for the server hibernation enter message. |
+| `discrelay_serverhibernation_exit_color` | `3CB371` | HEX color for the server hibernation exit message. |
+| `discrelay_consolemessage_color` | `8650AC` | HEX color for the console message. |
+| `discrelay_connectmessage_color` | `3CB371` | HEX color for the connect message. |
+| `discrelay_disconnectmessage_color` | `DC143C` | HEX color for the disconnect message. |
+| `discrelay_banmessage_color` | `DC143C` | HEX color for the ban message. |
+| `discrelay_currentmap_color` | `FFD700` | HEX color for the current map message. |
+| `discrelay_previousmap_color` | `DC143C` | HEX color for the previous map message. |
+| `discrelay_rcon_printresponse_color` | `2F4F4F` | HEX color for the RCON response message. |
+| `discrelay_serverstart_color` | `3CB371` | HEX color for the server start message.|
+
+### Moderation
+| Cvar | Default | Description |
+|------|---------|-------------|
+| `discrelay_calladmin_cooldown` | `60.0` | Cooldown in seconds for `sm_calladmin` per player.|
+| `discrelay_filter_words` || Filter words through Regex expressions.|
