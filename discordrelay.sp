@@ -384,7 +384,7 @@ public void PrintToDiscordSay(int userid, const char[] msg, any...)
         }
 
         char buffer[128];
-        if (g_cvShowSteamID.BoolValue && StrEqual(g_sShowSteamID, "name"))
+        if (StrEqual(g_sShowSteamID, "name"))
         {
             Format(buffer, sizeof(buffer), "%N [%s]", client, g_Players[GetClientUserId(client)].SteamID2);
         }
