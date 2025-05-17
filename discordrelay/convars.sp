@@ -183,7 +183,7 @@ void SetupConvars()
     g_cvCallAdminCooldown.AddChangeHook(OnDiscordRelayCvarChanged);
     g_fCallAdminCooldown = g_cvCallAdminCooldown.FloatValue;
 
-    // Webhooks for specific features
+    // More Webhooks
     g_cvServerHibernationWebhook = AutoExecConfig_CreateConVar("discrelay_serverhibernation_webhook", "", "Webhook for server hibernation notifications.");
     g_cvMapStatusWebhook = AutoExecConfig_CreateConVar("discrelay_mapstatus_webhook", "", "Webhook for map status (current/previous map) notifications.");
     g_cvListenChatWebhook = AutoExecConfig_CreateConVar("discrelay_listenchat_webhook", "", "Webhook for listening to chat notifications.");
@@ -231,4 +231,5 @@ public void OnDiscordRelayCvarChanged(ConVar convar, char[] oldValue, char[] new
     g_cvMapStatusWebhook.GetString(g_sMapStatusWebhook, sizeof(g_sMapStatusWebhook));
     g_cvListenChatWebhook.GetString(g_sListenChatWebhook, sizeof(g_sListenChatWebhook));
     g_cvListenRCONWebhook.GetString(g_sListenRCONWebhook, sizeof(g_sListenRCONWebhook));
+    g_cvAdminWebhook.GetString(g_sAdminWebhook, sizeof(g_sAdminWebhook));
 }

@@ -1,23 +1,19 @@
+#define PLUGIN_NAME "Discord Relay"
+
 float g_fCallAdminLastUsed[MAXPLAYERS + 1];
 
 public Action Command_CallAdmin(int client, int args)
 {
-    // Use admin webhook if set, otherwise fallback to main webhook
-    char webhook[256];
-    if (g_sAdminWebhook[0])
-        strcopy(webhook, sizeof(webhook), g_sAdminWebhook);
-    else
-        strcopy(webhook, sizeof(webhook), g_sDiscordWebhook);
-
-    if (!g_cvServerToDiscord.BoolValue || webhook[0] == '\0')
+    // Use admin webhook if set, otherwise fallback to RCON webhook
+    if (!g_cvServerToDiscord.BoolValue || g_sAdminWebhook[0] == '\0')
     {
-        ReplyToCommand(client, "[DiscordRelay] Discord relay is not enabled or webhook is not set.");
+        ReplyToCommand(client, "[%s] Discord relay is not enabled or webhook is not set.", PLUGIN_NAME);
         return Plugin_Handled;
     }
 
     if (args < 1)
     {
-        ReplyToCommand(client, "[DiscordRelay] Usage: sm_calladmin <message>");
+        ReplyToCommand(client, "[%s] Usage: sm_calladmin <reason>", PLUGIN_NAME);
         return Plugin_Handled;
     }
 
@@ -28,7 +24,7 @@ public Action Command_CallAdmin(int client, int args)
         if (g_fCallAdminLastUsed[client] > 0.0 && (now - g_fCallAdminLastUsed[client]) < g_fCallAdminCooldown)
         {
             int seconds = RoundToCeil(g_fCallAdminCooldown - (now - g_fCallAdminLastUsed[client]));
-            ReplyToCommand(client, "[DiscordRelay] Please wait %d seconds before using sm_calladmin again.", seconds);
+            ReplyToCommand(client, "[%s] Please wait %d seconds before using sm_calladmin again.", PLUGIN_NAME, seconds);
             return Plugin_Handled;
         }
         g_fCallAdminLastUsed[client] = now;
@@ -59,7 +55,7 @@ public Action Command_CallAdmin(int client, int args)
         avatar[0] = '\0';
     }
 
-    DiscordWebHook hook = new DiscordWebHook(webhook);
+    DiscordWebHook hook = new DiscordWebHook(g_sAdminWebhook);
     hook.SetUsername(name);
 
     // Mention admin role outside the embed for proper ping
@@ -96,6 +92,6 @@ public Action Command_CallAdmin(int client, int args)
     hook.Send();
     delete hook;
 
-    ReplyToCommand(client, "[Discord Relay] Admins have been notified on Discord.");
+    ReplyToCommand(client, "[%s] Admins have been notified on Discord.", PLUGIN_NAME);
     return Plugin_Handled;
 }

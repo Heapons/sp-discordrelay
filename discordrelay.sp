@@ -132,7 +132,11 @@ public void OnMapEnd()
             char phrase[64];
             Format(phrase, sizeof(phrase), "%T", "RCON Relay Stopped", LANG_SERVER);
             // Use specific webhook if set, otherwise fallback to main webhook
-            const char[] webhook = g_sListenRCONWebhook[0] ? g_sListenRCONWebhook : g_sRCONWebhook;
+            char webhook[256];
+            if (g_sListenRCONWebhook[0])
+                strcopy(webhook, sizeof(webhook), g_sListenRCONWebhook);
+            else
+                strcopy(webhook, sizeof(webhook), g_sRCONWebhook);
             PrintToChannel(webhook, phrase, g_sListenAnnounceColor);
         }
 
@@ -141,7 +145,11 @@ public void OnMapEnd()
             char phrase[64];
             Format(phrase, sizeof(phrase), "%T", "Chat Relay Stopped", LANG_SERVER);
             // Use specific webhook if set, otherwise fallback to main webhook
-            const char[] webhook = g_sListenChatWebhook[0] ? g_sListenChatWebhook : g_sDiscordWebhook;
+            char webhook[256];
+            if (g_sListenChatWebhook[0])
+                strcopy(webhook, sizeof(webhook), g_sListenChatWebhook);
+            else
+                strcopy(webhook, sizeof(webhook), g_sDiscordWebhook);
             PrintToChannel(webhook, phrase, g_sListenAnnounceColor);
         }
     }
@@ -161,7 +169,11 @@ public void OnServerEnterHibernation()
     Format(phrase, sizeof(phrase), "%T", "Hibernation Enter", LANG_SERVER);
 
     // Use specific webhook if set, otherwise fallback to main webhook
-    const char[] webhook = g_sServerHibernationWebhook[0] ? g_sServerHibernationWebhook : g_sDiscordWebhook;
+    char webhook[256];
+    if (g_sServerHibernationWebhook[0])
+        strcopy(webhook, sizeof(webhook), g_sServerHibernationWebhook);
+    else
+        strcopy(webhook, sizeof(webhook), g_sDiscordWebhook);
     AnnounceToChannel(webhook, phrase, g_sServerHibernationEnterColor);
 }
 
@@ -173,7 +185,11 @@ public void OnServerExitHibernation()
     Format(phrase, sizeof(phrase), "%T", "Hibernation Exit", LANG_SERVER);
 
     // Use specific webhook if set, otherwise fallback to main webhook
-    const char[] webhook = g_sServerHibernationWebhook[0] ? g_sServerHibernationWebhook : g_sDiscordWebhook;
+    char webhook[256];
+    if (g_sServerHibernationWebhook[0])
+        strcopy(webhook, sizeof(webhook), g_sServerHibernationWebhook);
+    else
+        strcopy(webhook, sizeof(webhook), g_sDiscordWebhook);
     AnnounceToChannel(webhook, phrase, g_sServerHibernationExitColor);
 }
 
@@ -393,7 +409,11 @@ public void PrintToDiscordMapChange(const char[] map, const char[] color)
     }
 
     // Use specific webhook if set, otherwise fallback to main webhook
-    const char[] webhook = g_sMapStatusWebhook[0] ? g_sMapStatusWebhook : g_sDiscordWebhook;
+    char webhook[256];
+    if (g_sMapStatusWebhook[0])
+        strcopy(webhook, sizeof(webhook), g_sMapStatusWebhook);
+    else
+        strcopy(webhook, sizeof(webhook), g_sDiscordWebhook);
     DiscordWebHook hook = new DiscordWebHook(webhook);
     hook.SetUsername("Server Status");
     
@@ -471,7 +491,11 @@ public void PrintToDiscordPreviousMap(const char[] map, const char[] color)
     }
 
     // Use specific webhook if set, otherwise fallback to main webhook
-    const char[] webhook = g_sMapStatusWebhook[0] ? g_sMapStatusWebhook : g_sDiscordWebhook;
+    char webhook[256];
+    if (g_sMapStatusWebhook[0])
+        strcopy(webhook, sizeof(webhook), g_sMapStatusWebhook);
+    else
+        strcopy(webhook, sizeof(webhook), g_sDiscordWebhook);
     DiscordWebHook hook = new DiscordWebHook(webhook);
     hook.SetUsername("Server Status");
     
@@ -521,13 +545,12 @@ public void PrintToDiscordPreviousMap(const char[] map, const char[] color)
     Format(phrase, sizeof(phrase), "%T", "Previous Map", LANG_SERVER);
     Embed.AddField(new DiscordEmbedField(phrase, mapFastDL, true));
 
-    // Add server IP as footer
     int ip[4];
     char ipStr[MAX_BUFFER_LENGTH];
     if (SteamWorks_GetPublicIP(ip))
     {
-        Format(ipStr, sizeof(ipStr), "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
-        // Add favicon as footer icon
+        int hostport = GetConVarInt(FindConVar("hostport"));
+        Format(ipStr, sizeof(ipStr), "steam://connect/%d.%d.%d.%d:%i", ip[0], ip[1], ip[2], ip[3], hostport);
         DiscordEmbedFooter footer = new DiscordEmbedFooter(ipStr, "https://imgur.com/lgka1Tp.png");
         Embed.WithFooter(footer);
     }
@@ -601,7 +624,11 @@ public void OnRelayChannelReceived(DiscordBot bot, DiscordChannel channel)
             char phrase[64];
             Format(phrase, sizeof(phrase), "%T", "Listening to Chat", LANG_SERVER);
             // Use specific webhook if set, otherwise fallback to main webhook
-            const char[] webhook = g_sListenChatWebhook[0] ? g_sListenChatWebhook : g_sDiscordWebhook;
+            char webhook[256];
+            if (g_sListenChatWebhook[0])
+                strcopy(webhook, sizeof(webhook), g_sListenChatWebhook);
+            else
+                strcopy(webhook, sizeof(webhook), g_sDiscordWebhook);
             PrintToChannel(webhook, phrase, g_sListenAnnounceColor);
             g_ChatAnnounced = true;
         }
@@ -633,7 +660,11 @@ public void OnRCONChannelReceived(DiscordBot bot, DiscordChannel channel)
             char phrase[64];
             Format(phrase, sizeof(phrase), "%T", "Listening to RCON", LANG_SERVER);
             // Use specific webhook if set, otherwise fallback to main webhook
-            const char[] webhook = g_sListenRCONWebhook[0] ? g_sListenRCONWebhook : g_sRCONWebhook;
+            char webhook[256];
+            if (g_sListenRCONWebhook[0])
+                strcopy(webhook, sizeof(webhook), g_sListenRCONWebhook);
+            else
+                strcopy(webhook, sizeof(webhook), g_sRCONWebhook);
             PrintToChannel(webhook, phrase, g_sListenAnnounceColor);
             g_RCONAnnounced = true;
         }
@@ -710,6 +741,8 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
             }
             else
             {
+                DiscordEmoji emoji = DiscordEmoji.FromName("✅");
+                g_Bot.CreateReaction(chl, discordmessage, emoji);
                 Format(response, sizeof(response), "%T", "RCON Output", LANG_SERVER, response);
             }
             
