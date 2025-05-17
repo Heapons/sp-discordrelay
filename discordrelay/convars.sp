@@ -62,6 +62,8 @@ ConVar g_cvShowSteamID;
 char g_sShowSteamID[32];
 ConVar g_cvAdminRole;
 char g_sAdminRole[64];
+ConVar g_cvFilterWords;
+char g_sFilterWords[MAX_MESSAGE_LENGTH];
 
 ConVar g_cvCallAdminCooldown;
 float g_fCallAdminCooldown = 60.0;
@@ -74,6 +76,8 @@ ConVar g_cvListenChatWebhook;
 char g_sListenChatWebhook[256];
 ConVar g_cvListenRCONWebhook;
 char g_sListenRCONWebhook[256];
+ConVar g_cvBlockedMessageColor;
+char g_sBlockedMessageColor[32];
 
 void SetupConvars() 
 {
@@ -151,6 +155,7 @@ void SetupConvars()
     g_cvPreviousMapColor = AutoExecConfig_CreateConVar("discrelay_previousmap_color", "DC143C", "HEX color for the previous map message");
     g_cvPrintRCONResponseColor = AutoExecConfig_CreateConVar("discrelay_rcon_printresponse_color", "2F4F4F", "HEX color for the RCON response message");
     g_cvServerStartColor = AutoExecConfig_CreateConVar("discrelay_serverstart_color", "3CB371", "HEX color for the server start message");
+    g_cvBlockedMessageColor = AutoExecConfig_CreateConVar("discrelay_blockedmessage_color", "DC143C", "HEX color for blocked message embeds.");
     
     g_cvServerMessageColor.GetString(g_sServerMessageColor, sizeof(g_sServerMessageColor));
     g_cvListenAnnounceColor.GetString(g_sListenAnnounceColor, sizeof(g_sListenAnnounceColor));
@@ -164,6 +169,7 @@ void SetupConvars()
     g_cvPreviousMapColor.GetString(g_sPreviousMapColor, sizeof(g_sPreviousMapColor));
     g_cvPrintRCONResponseColor.GetString(g_sPrintRCONResponseColor, sizeof(g_sPrintRCONResponseColor));
     g_cvServerStartColor.GetString(g_sServerStartColor, sizeof(g_sServerStartColor));
+    g_cvBlockedMessageColor.GetString(g_sBlockedMessageColor, sizeof(g_sBlockedMessageColor));
 
 
     g_cvListenAnnounceColor.AddChangeHook(OnDiscordRelayCvarChanged);
@@ -177,11 +183,14 @@ void SetupConvars()
     g_cvPreviousMapColor.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvPrintRCONResponseColor.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvServerStartColor.AddChangeHook(OnDiscordRelayCvarChanged);
+    g_cvBlockedMessageColor.AddChangeHook(OnDiscordRelayCvarChanged);
     
-    // Call Admin
+    // Moderation
     g_cvCallAdminCooldown = AutoExecConfig_CreateConVar("discrelay_calladmin_cooldown", "60.0", "Cooldown in seconds for sm_calladmin per player.");
     g_cvCallAdminCooldown.AddChangeHook(OnDiscordRelayCvarChanged);
     g_fCallAdminCooldown = g_cvCallAdminCooldown.FloatValue;
+    g_cvFilterWords = AutoExecConfig_CreateConVar("discrelay_filter_words", "", "Filter words through Regex expressions.");
+    g_cvFilterWords.AddChangeHook(OnDiscordRelayCvarChanged);
 
     // More Webhooks
     g_cvServerHibernationWebhook = AutoExecConfig_CreateConVar("discrelay_serverhibernation_webhook", "", "Webhook for server hibernation notifications.");
@@ -198,6 +207,8 @@ void SetupConvars()
     g_cvMapStatusWebhook.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvListenChatWebhook.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvListenRCONWebhook.AddChangeHook(OnDiscordRelayCvarChanged);
+
+    g_cvFilterWords.GetString(g_sFilterWords, sizeof(g_sFilterWords));
 
     AutoExecConfig_CleanFile();
     AutoExecConfig_ExecuteFile();
@@ -232,4 +243,6 @@ public void OnDiscordRelayCvarChanged(ConVar convar, char[] oldValue, char[] new
     g_cvListenChatWebhook.GetString(g_sListenChatWebhook, sizeof(g_sListenChatWebhook));
     g_cvListenRCONWebhook.GetString(g_sListenRCONWebhook, sizeof(g_sListenRCONWebhook));
     g_cvAdminWebhook.GetString(g_sAdminWebhook, sizeof(g_sAdminWebhook));
+    g_cvFilterWords.GetString(g_sFilterWords, sizeof(g_sFilterWords));
+    g_cvBlockedMessageColor.GetString(g_sBlockedMessageColor, sizeof(g_sBlockedMessageColor));
 }

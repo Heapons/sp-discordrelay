@@ -71,7 +71,7 @@ public Action Command_CallAdmin(int client, int args)
     embed.SetColor(g_sServerMessageColor);
 
     char title[128];
-    Format(title, sizeof(title), "%T", "Player Report Title", LANG_SERVER, title);
+    Format(title, sizeof(title), "%T", "Player Report Title", LANG_SERVER);
 
     // Set embed title as the first field (DiscordEmbedField)
     embed.AddField(new DiscordEmbedField(title, "", false));
@@ -83,7 +83,7 @@ public Action Command_CallAdmin(int client, int args)
 
     // Reason field
     char reasonTitle[64];
-    Format(reasonTitle, sizeof(reasonTitle), "%T", "Player Report Reason", LANG_SERVER, msg);
+    Format(reasonTitle, sizeof(reasonTitle), "%T", "Player Report Reason", LANG_SERVER);
     embed.AddField(new DiscordEmbedField(reasonTitle, msg, false));
 
     hook.SetAvatar(avatar);

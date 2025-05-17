@@ -12,8 +12,9 @@
 #include "discordrelay/convars.sp"
 #include "discordrelay/globals.sp"
 #include "discordrelay/calladmin.sp"
+#include "discordrelay/wordfilter.sp"
 
-#define PLUGIN_VERSION "1.4.5"
+#define PLUGIN_VERSION "1.4.6"
 
 public Plugin myinfo = 
 {
@@ -34,6 +35,8 @@ public void OnPluginStart()
 {
     LoadTranslations("discordrelay.phrases.txt");
     SetupConvars();
+
+    WordFilter_OnPluginStart();
 
     g_ChatAnnounced = false;
     g_RCONAnnounced = false;
@@ -236,8 +239,62 @@ public Action MapEnd()
     return Plugin_Continue;
 }
 
+public Action OnClientSayCommand(int client, const char[] command, const char[] sArgs)
+{
+    if (WordFilter_ShouldBlock(sArgs))
+    {
+        if (g_sAdminWebhook[0])
+        {
+            char name[MAX_NAME_LENGTH];
+            char steamid[64];
+            char steamid2[32];
+            if (IsValidClient(client))
+            {
+                Format(name, sizeof(name), "%N", client);
+                int playerUserID = GetClientUserId(client);
+                strcopy(steamid, sizeof(steamid), g_Players[playerUserID].SteamID64);
+                strcopy(steamid2, sizeof(steamid2), g_Players[playerUserID].SteamID2);
+            }
+            else
+            {
+                strcopy(name, sizeof(name), "CONSOLE");
+                steamid[0] = '\0';
+                steamid2[0] = '\0';
+            }
+
+            DiscordWebHook hook = new DiscordWebHook(g_sAdminWebhook);
+            hook.SetUsername("WordFilter");
+
+            DiscordEmbed embed = new DiscordEmbed();
+            embed.SetColor(g_sBlockedMessageColor);
+
+            char title[MAX_BUFFER_LENGTH];
+            Format(title, sizeof(title), "%T", "Blocked Message Title", LANG_SERVER, name, steamid);
+            embed.AddField(new DiscordEmbedField("", title, false));
+
+            // Message content as the next field
+            embed.AddField(new DiscordEmbedField("", sArgs, false));
+
+            if (steamid2[0])
+            {
+                DiscordEmbedFooter footer = new DiscordEmbedFooter(steamid2);
+                embed.WithFooter(footer);
+            }
+
+            hook.Embed(embed);
+            hook.Send();
+            delete hook;
+        }
+        return Plugin_Handled;
+    }
+
+    return Plugin_Continue;
+}
+
 public void OnClientSayCommand_Post(int client, const char[] command, const char[] sArgs)
 {
+    if (WordFilter_ShouldBlock(sArgs)) return;
+
     char prefixes[10][16];
     int prefixCount = ExplodeString(g_sHideCommands, ",", prefixes, sizeof(prefixes), sizeof(prefixes[]));
 

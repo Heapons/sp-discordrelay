@@ -2,28 +2,41 @@
 {
     "Discord To Server"
     {
-        "#format"	"{1:s},{2:s}"
-        "en"		"*DISCORD* {uncommon}{1} :  {2}" // {1} = Discord Username | {2} = Message
+        "#format"	"{1:s},{2:s}" // {1} = Discord Username | {2} = Message
+        "en"		"*DISCORD* {gray}{1}{default} :  {2}"
     }
     "Discord To Server Reply"
     {
-        "#format"	"{1:s},{2:s}"
-        "en"		"*DISCORD* {uncommon}(Reply) {1} :  {2}" // {1} = Discord Username | {2} = Message
+        "#format"	"{1:s},{2:s}" // {1} = Discord Username | {2} = Message
+        "en"		"*DISCORD* {gray}(Reply) {1}{default} :  {2}"
     }
     "Player Join"
     {
-        "#format"	"{1:s},{2:s}"
+        "#format"	"{1:s},{2:i}" // {1} = Player Name | {2} = SteamID
         "en"		"[{1}](http://www.steamcommunity.com/profiles/{2}) joined the game"
     }
     "Player Banned"
     {
-		"#format"	"{1:N}"
-        "en" 		"{1} has been banned"
+		"#format"	"{1:s},{2:i}"
+        "en" 		"[{1}](http://www.steamcommunity.com/profiles/{2}) has been banned"
     }
     "Player Leave"
     {
-		"#format"	"{1:N}"
-        "en" 		"{1} left the game"
+		"#format"	"{1:s},{2:i}"
+        "en" 		"[{1}](http://www.steamcommunity.com/profiles/{2}) left the game"
+    }
+    "Player Report"
+    {
+        "#format"	"{1:s},{2:i}" // {1} = Player Name | {2} = SteamID
+        "en"		"[{1}](http://www.steamcommunity.com/profiles/{2}) has submitted a report!"
+    }
+    "Player Report Title"
+    {
+        "en"		"Player Report"
+    }
+    "Player Report Reason"
+    {
+        "en"		"Reason:"
     }
     "Hibernation Enter"
     {
@@ -57,11 +70,11 @@
     {
         "en"		"Previous Map:"
     }
-    //"Map Name"
-    //{   
-    //    "#format"	"{1:s},{2:s}" // "[{1}]({2})" <=> "[map_name](map_url)"
-    //    "en"		"[{1}]({2})"
-	//}
+    "Map Name"
+    {   
+        "#format"	"{1:s},{2:s}" // {1} = Map Name | {2} = Map URL
+        "en"		"[{1}]({2})"
+	}
     "Player Count"
     {
         "en"		"Player Count:"
@@ -96,5 +109,10 @@
         // ```
         "#format"	"{1:s}"
         "en"		"```hs\n{1}\n```" // Use '\n' for new lines
+    }
+    "Blocked Message Title"
+    {
+        "#format"   "{1:s},{2:i}"
+        "en"        "**Blocked message from [{1}](http://www.steamcommunity.com/profiles/{2})**"
     }
 }
