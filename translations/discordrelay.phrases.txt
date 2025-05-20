@@ -12,22 +12,22 @@
     }
     "Player Join"
     {
-        "#format"	"{1:s},{2:i}" // {1} = Player Name | {2} = SteamID
+        "#format"	"{1:s},{2:s}" // {1} = Player Name | {2} = SteamID
         "en"		"[{1}](http://www.steamcommunity.com/profiles/{2}) joined the game"
     }
     "Player Banned"
     {
-		"#format"	"{1:s},{2:i}"
+		"#format"	"{1:s},{2:s}"
         "en" 		"[{1}](http://www.steamcommunity.com/profiles/{2}) has been banned"
     }
     "Player Leave"
     {
-		"#format"	"{1:s},{2:i}"
+		"#format"	"{1:s},{2:s}"
         "en" 		"[{1}](http://www.steamcommunity.com/profiles/{2}) left the game"
     }
     "Player Report"
     {
-        "#format"	"{1:s},{2:i}" // {1} = Player Name | {2} = SteamID
+        "#format"	"{1:s},{2:s}" // {1} = Player Name | {2} = SteamID
         "en"		"[{1}](http://www.steamcommunity.com/profiles/{2}) has submitted a report!"
     }
     "Player Report Title"
