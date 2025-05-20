@@ -112,7 +112,7 @@
     }
     "Blocked Message Title"
     {
-        "#format"   "{1:s},{2:i}"
+        "#format"   "{1:s},{2:s}"
         "en"        "**Blocked message from [{1}](http://www.steamcommunity.com/profiles/{2})**"
     }
 }
