@@ -5,6 +5,8 @@
 #include <autoexecconfig>
 #undef REQUIRE_EXTENSIONS
 #include <ripext>
+#include <SteamWorks>
+#include <files>
 
 #pragma semicolon 1
 #pragma newdecls required
@@ -14,7 +16,7 @@
 #include "discordrelay/calladmin.sp"
 #include "discordrelay/wordfilter.sp"
 
-#define PLUGIN_VERSION "1.4.6"
+#define PLUGIN_VERSION "1.4.7"
 
 public Plugin myinfo = 
 {
@@ -57,7 +59,7 @@ public void OnPluginStart()
         CreateTimer(1.0, Timer_ServerStart);
     }
 
-    RegConsoleCmd("sm_calladmin", Command_CallAdmin, "Call an admin via Discord relay");
+    RegConsoleCmd("sm_calladmin", Command_CallAdmin, "Call an admin on Discord");
 }
 
 public void OnClientPostAdminCheck(int client)
@@ -81,9 +83,9 @@ public void OnClientDisconnect(int client)
     if (g_cvDisconnectMessage.BoolValue)
     {
         char phrase[128];
-        char name[64];
-        Format(name, sizeof(name), "%N", client);
-        Format(phrase, sizeof(phrase), "%T", "Player Leave", LANG_SERVER, name, g_Players[userid].SteamID64);
+        char playerName[MAX_NAME_LENGTH];
+        Format(playerName, sizeof(playerName), "%N", client);
+        Format(phrase, sizeof(phrase), "%T", "Player Leave", LANG_SERVER, playerName, g_Players[userid].SteamID64);
         PrintToDiscord(userid, g_sDisconnectMessageColor, phrase);
     }
 
@@ -101,9 +103,9 @@ public Action OnBanClient(int client)
     if (g_cvDisconnectMessage.BoolValue)
     {
         char phrase[128];
-        char name[64];
-        Format(name, sizeof(name), "%N", client);
-        Format(phrase, sizeof(phrase), "%T", "Player Banned", LANG_SERVER, name, g_Players[userid].SteamID64);
+        char playerName[MAX_NAME_LENGTH];
+        Format(playerName, sizeof(playerName), "%N", client);
+        Format(phrase, sizeof(phrase), "%T", "Player Banned", LANG_SERVER, playerName, g_Players[userid].SteamID64);
         PrintToDiscord(userid, g_sBanMessageColor, phrase);
     }
 
@@ -128,35 +130,6 @@ public void OnMapStart()
 
 public void OnMapEnd()
 {
-    if (g_cvListenAnnounce.BoolValue)
-    {
-        if (g_ChatAnnounced)
-        {
-            char phrase[64];
-            Format(phrase, sizeof(phrase), "%T", "RCON Relay Stopped", LANG_SERVER);
-            // Use specific webhook if set, otherwise fallback to main webhook
-            char webhook[256];
-            if (g_sListenRCONWebhook[0])
-                strcopy(webhook, sizeof(webhook), g_sListenRCONWebhook);
-            else
-                strcopy(webhook, sizeof(webhook), g_sRCONWebhook);
-            PrintToChannel(webhook, phrase, g_sListenAnnounceColor);
-        }
-
-        if (g_RCONAnnounced)
-        {
-            char phrase[64];
-            Format(phrase, sizeof(phrase), "%T", "Chat Relay Stopped", LANG_SERVER);
-            // Use specific webhook if set, otherwise fallback to main webhook
-            char webhook[256];
-            if (g_sListenChatWebhook[0])
-                strcopy(webhook, sizeof(webhook), g_sListenChatWebhook);
-            else
-                strcopy(webhook, sizeof(webhook), g_sDiscordWebhook);
-            PrintToChannel(webhook, phrase, g_sListenAnnounceColor);
-        }
-    }
-
     if (g_Bot.IsListeningToChannelID(g_sChannelId)) g_Bot.StopListeningToChannelID(g_sChannelId);
     if (g_Bot.IsListeningToChannelID(g_sRCONChannelId)) g_Bot.StopListeningToChannelID(g_sRCONChannelId);
 
@@ -171,7 +144,6 @@ public void OnServerEnterHibernation()
     char phrase[128];
     Format(phrase, sizeof(phrase), "%T", "Hibernation Enter", LANG_SERVER);
 
-    // Use specific webhook if set, otherwise fallback to main webhook
     char webhook[256];
     if (g_sServerHibernationWebhook[0])
         strcopy(webhook, sizeof(webhook), g_sServerHibernationWebhook);
@@ -187,7 +159,6 @@ public void OnServerExitHibernation()
     char phrase[128];
     Format(phrase, sizeof(phrase), "%T", "Hibernation Exit", LANG_SERVER);
 
-    // Use specific webhook if set, otherwise fallback to main webhook
     char webhook[256];
     if (g_sServerHibernationWebhook[0])
         strcopy(webhook, sizeof(webhook), g_sServerHibernationWebhook);
@@ -245,21 +216,18 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
     {
         if (g_sAdminWebhook[0])
         {
-            char name[MAX_NAME_LENGTH];
+            char name[64];
             char steamid[64];
             char steamid2[32];
             if (IsValidClient(client))
             {
                 Format(name, sizeof(name), "%N", client);
-                int playerUserID = GetClientUserId(client);
-                strcopy(steamid, sizeof(steamid), g_Players[playerUserID].SteamID64);
-                strcopy(steamid2, sizeof(steamid2), g_Players[playerUserID].SteamID2);
+                strcopy(steamid, sizeof(steamid), g_Players[GetClientUserId(client)].SteamID64);
+                strcopy(steamid2, sizeof(steamid2), g_Players[GetClientUserId(client)].SteamID2);
             }
             else
             {
                 strcopy(name, sizeof(name), "CONSOLE");
-                steamid[0] = '\0';
-                steamid2[0] = '\0';
             }
 
             DiscordWebHook hook = new DiscordWebHook(g_sAdminWebhook);
@@ -268,11 +236,9 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
             DiscordEmbed embed = new DiscordEmbed();
             embed.SetColor(g_sBlockedMessageColor);
 
-            char title[MAX_BUFFER_LENGTH];
+            char title[256];
             Format(title, sizeof(title), "%T", "Blocked Message Title", LANG_SERVER, name, steamid);
             embed.AddField(new DiscordEmbedField("", title, false));
-
-            // Message content as the next field
             embed.AddField(new DiscordEmbedField("", sArgs, false));
 
             if (steamid2[0])
@@ -382,7 +348,7 @@ public void PrintToDiscord(int userid, const char[] color, const char[] msg, any
         hook.SetAvatar(g_Players[userid].AvatarURL);
     }
     
-    char buffer[128];
+    char buffer[MAX_NAME_LENGTH];
     Format(buffer, sizeof(buffer), "%N", client);
     hook.SetUsername(buffer);
     
@@ -411,13 +377,14 @@ public void PrintToDiscord(int userid, const char[] color, const char[] msg, any
 
 public void PrintToDiscordSay(int userid, const char[] msg, any...)
 {
-    if (!g_cvServerToDiscord.BoolValue) return;
+    if (!g_cvServerToDiscord.BoolValue)
+        return;
 
     int client = userid ? GetClientOfUserId(userid) : 0;
-    char formattedMessage[256];
+    char formattedMessage[MAX_MESSAGE_LENGTH];
     DiscordWebHook hook = new DiscordWebHook(g_sDiscordWebhook);
-    
-    if (!IsValidClient(client))
+
+    if (userid == 0) // SERVER CONSOLE
     {
         if (!g_cvServerMessage.BoolValue)
         {
@@ -426,12 +393,17 @@ public void PrintToDiscordSay(int userid, const char[] msg, any...)
         }
 
         hook.SetUsername("CONSOLE");
-        Format(formattedMessage, sizeof(formattedMessage), "```%s```", msg);
+        Format(formattedMessage, sizeof(formattedMessage), "```\n%s\n```", msg);
 
         DiscordEmbed Embed = new DiscordEmbed();
         Embed.SetColor(g_sServerMessageColor);
         Embed.AddField(new DiscordEmbedField("", formattedMessage, false));
         hook.Embed(Embed);
+    }
+    else if (!IsValidClient(client))
+    {
+        delete hook;
+        return;
     }
     else
     {
@@ -443,12 +415,13 @@ public void PrintToDiscordSay(int userid, const char[] msg, any...)
         char buffer[128];
         if (StrEqual(g_sShowSteamID, "name"))
         {
-            Format(buffer, sizeof(buffer), "%N [%s]", client, g_Players[GetClientUserId(client)].SteamID2);
+            Format(buffer, sizeof(buffer), "%N [%s]", client, g_Players[userid].SteamID2);
         }
         else
         {
             Format(buffer, sizeof(buffer), "%N", client);
         }
+
         hook.SetUsername(buffer);
         Format(formattedMessage, sizeof(formattedMessage), "%s", msg);
         hook.SetContent(formattedMessage);
@@ -465,7 +438,6 @@ public void PrintToDiscordMapChange(const char[] map, const char[] color)
         return;
     }
 
-    // Use specific webhook if set, otherwise fallback to main webhook
     char webhook[256];
     if (g_sMapStatusWebhook[0])
         strcopy(webhook, sizeof(webhook), g_sMapStatusWebhook);
@@ -496,10 +468,13 @@ public void PrintToDiscordMapChange(const char[] map, const char[] color)
         Embed.AddField(new DiscordEmbedField(phrase, sv_tags, false));
     }
 
-    char mapFastDL[MAX_BUFFER_LENGTH];
-    char mapUrl[MAX_BUFFER_LENGTH];
-    if (StrContains(map, "workshop/", false) != -1)
+    char mapFastDL[256];
+    char mapUrl[256];
+
+    // Revert to checking for "workshop/" prefix
+    if (strncmp(map, "workshop/", 9, false) == 0)
     {
+        // Map is a workshop map
         char workshopId[2][64];
         ExplodeString(map, "/", workshopId, sizeof(workshopId), sizeof(workshopId[]));
 
@@ -516,22 +491,44 @@ public void PrintToDiscordMapChange(const char[] map, const char[] color)
         Format(mapUrl, sizeof(mapUrl), "%s/maps/%s.bsp", sv_downloadurl, map);
         Format(mapFastDL, sizeof(mapFastDL), "%T", "Map Name", LANG_SERVER, map, mapUrl, 0);
     }
+
     char phrase[64];
     Format(phrase, sizeof(phrase), "%T", "Current Map", LANG_SERVER);
     Embed.AddField(new DiscordEmbedField(phrase, mapFastDL, true));
     
     char buffer[512];
-    Format(buffer, sizeof(buffer), "%d/%d", GetOnlinePlayers(), GetMaxHumanPlayers());
+    int players = GetOnlinePlayers();
+    int bots = 0;
+    for (int i = 1; i <= MaxClients; i++)
+    {
+        if (IsClientConnected(i) && IsFakeClient(i) && !IsClientSourceTV(i))
+        {
+            bots++;
+        }
+    }
+    if (bots > 0)
+        Format(buffer, sizeof(buffer), "%d/%d (+ %d)", players, GetMaxHumanPlayers(), bots);
+    else
+        Format(buffer, sizeof(buffer), "%d/%d", players, GetMaxHumanPlayers());
     Format(phrase, sizeof(phrase), "%T", "Player Count", LANG_SERVER);
     Embed.AddField(new DiscordEmbedField(phrase, buffer, true));
 
     int ip[4];
-    char ipStr[MAX_BUFFER_LENGTH];
-    if (SteamWorks_GetPublicIP(ip))
+    char ipStr[256];
+    if (g_cvShowServerIP.BoolValue && SteamWorks_GetPublicIP(ip))
     {
         int hostport = GetConVarInt(FindConVar("hostport"));
         Format(ipStr, sizeof(ipStr), "steam://connect/%d.%d.%d.%d:%i", ip[0], ip[1], ip[2], ip[3], hostport);
-        DiscordEmbedFooter footer = new DiscordEmbedFooter(ipStr, "https://imgur.com/lgka1Tp.png");
+
+        if (g_sFooterIconURL[0])
+        {
+            DiscordEmbedFooter footer = new DiscordEmbedFooter(ipStr, g_sFooterIconURL);
+        }
+        else
+        {
+            DiscordEmbedFooter footer = new DiscordEmbedFooter(ipStr);
+        }
+
         Embed.WithFooter(footer);
     }
 
@@ -547,7 +544,6 @@ public void PrintToDiscordPreviousMap(const char[] map, const char[] color)
         return;
     }
 
-    // Use specific webhook if set, otherwise fallback to main webhook
     char webhook[256];
     if (g_sMapStatusWebhook[0])
         strcopy(webhook, sizeof(webhook), g_sMapStatusWebhook);
@@ -578,10 +574,13 @@ public void PrintToDiscordPreviousMap(const char[] map, const char[] color)
         Embed.AddField(new DiscordEmbedField(phrase, sv_tags, false));
     }
 
-    char mapFastDL[MAX_BUFFER_LENGTH];
-    char mapUrl[MAX_BUFFER_LENGTH];
-    if (StrContains(map, "workshop/", false) != -1)
+    char mapFastDL[256];
+    char mapUrl[256];
+
+    // Revert to checking for "workshop/" prefix
+    if (strncmp(map, "workshop/", 9, false) == 0)
     {
+        // Map is a workshop map
         char workshopId[2][64];
         ExplodeString(map, "/", workshopId, sizeof(workshopId), sizeof(workshopId[]));
 
@@ -598,18 +597,29 @@ public void PrintToDiscordPreviousMap(const char[] map, const char[] color)
         Format(mapUrl, sizeof(mapUrl), "%s/maps/%s.bsp", sv_downloadurl, map);
         Format(mapFastDL, sizeof(mapFastDL), "%T", "Map Name", LANG_SERVER, map, mapUrl, 0);
     }
+    
     char phrase[64];
     Format(phrase, sizeof(phrase), "%T", "Previous Map", LANG_SERVER);
     Embed.AddField(new DiscordEmbedField(phrase, mapFastDL, true));
 
     int ip[4];
-    char ipStr[MAX_BUFFER_LENGTH];
-    if (SteamWorks_GetPublicIP(ip))
+    char ipStr[256];
+    if (g_cvShowServerIP.BoolValue && SteamWorks_GetPublicIP(ip))
     {
         int hostport = GetConVarInt(FindConVar("hostport"));
         Format(ipStr, sizeof(ipStr), "steam://connect/%d.%d.%d.%d:%i", ip[0], ip[1], ip[2], ip[3], hostport);
-        DiscordEmbedFooter footer = new DiscordEmbedFooter(ipStr, "https://imgur.com/lgka1Tp.png");
-        Embed.WithFooter(footer);
+
+        // Only set footer icon if g_sFooterIconURL is not empty
+        if (g_sFooterIconURL[0])
+        {
+            DiscordEmbedFooter footer = new DiscordEmbedFooter(ipStr, g_sFooterIconURL);
+            Embed.WithFooter(footer);
+        }
+        else
+        {
+            DiscordEmbedFooter footer = new DiscordEmbedFooter(ipStr);
+            Embed.WithFooter(footer);
+        }
     }
 
     hook.Embed(Embed);
@@ -680,7 +690,6 @@ public void OnRelayChannelReceived(DiscordBot bot, DiscordChannel channel)
         {
             char phrase[64];
             Format(phrase, sizeof(phrase), "%T", "Listening to Chat", LANG_SERVER);
-            // Use specific webhook if set, otherwise fallback to main webhook
             char webhook[256];
             if (g_sListenChatWebhook[0])
                 strcopy(webhook, sizeof(webhook), g_sListenChatWebhook);
@@ -716,7 +725,6 @@ public void OnRCONChannelReceived(DiscordBot bot, DiscordChannel channel)
         {
             char phrase[64];
             Format(phrase, sizeof(phrase), "%T", "Listening to RCON", LANG_SERVER);
-            // Use specific webhook if set, otherwise fallback to main webhook
             char webhook[256];
             if (g_sListenRCONWebhook[0])
                 strcopy(webhook, sizeof(webhook), g_sListenRCONWebhook);
@@ -822,6 +830,36 @@ public void OnDiscordMessageSent(DiscordBot bot, DiscordChannel chl, DiscordMess
         else
         {
             ServerCommand(message);
+        }
+    }
+}
+
+public void OnPluginEnd()
+{
+    if (g_cvListenAnnounce.BoolValue)
+    {
+        if (g_ChatAnnounced)
+        {
+            char phrase[64];
+            Format(phrase, sizeof(phrase), "%T", "RCON Relay Stopped", LANG_SERVER);
+            char webhook[256];
+            if (g_sListenRCONWebhook[0])
+                strcopy(webhook, sizeof(webhook), g_sListenRCONWebhook);
+            else
+                strcopy(webhook, sizeof(webhook), g_sRCONWebhook);
+            PrintToChannel(webhook, phrase, g_sListenAnnounceColor);
+        }
+
+        if (g_RCONAnnounced)
+        {
+            char phrase[64];
+            Format(phrase, sizeof(phrase), "%T", "Chat Relay Stopped", LANG_SERVER);
+            char webhook[256];
+            if (g_sListenChatWebhook[0])
+                strcopy(webhook, sizeof(webhook), g_sListenChatWebhook);
+            else
+                strcopy(webhook, sizeof(webhook), g_sDiscordWebhook);
+            PrintToChannel(webhook, phrase, g_sListenAnnounceColor);
         }
     }
 }

@@ -42,6 +42,10 @@ char g_sPreviousMapColor[32];
 ConVar g_cvServerStartColor;
 char g_sServerStartColor[32];
 ConVar g_cvServerHibernation;
+ConVar g_cvShowServerIP;
+char g_sShowServerIP[32];
+ConVar g_cvFooterIconURL;
+char g_sFooterIconURL[256];
 
 ConVar g_cvServerMessage;
 ConVar g_cvServerMessageColor;
@@ -64,6 +68,8 @@ ConVar g_cvAdminRole;
 char g_sAdminRole[64];
 ConVar g_cvFilterWords;
 char g_sFilterWords[MAX_MESSAGE_LENGTH];
+ConVar g_cvBlockedMessageColor;
+char g_sBlockedMessageColor[32];
 
 ConVar g_cvCallAdminCooldown;
 float g_fCallAdminCooldown = 60.0;
@@ -76,8 +82,8 @@ ConVar g_cvListenChatWebhook;
 char g_sListenChatWebhook[256];
 ConVar g_cvListenRCONWebhook;
 char g_sListenRCONWebhook[256];
-ConVar g_cvBlockedMessageColor;
-char g_sBlockedMessageColor[32];
+//ConVar g_cvPlayerStatusWebhook;
+//char g_sPlayerStatusWebhook[256];
 
 void SetupConvars() 
 {
@@ -197,18 +203,25 @@ void SetupConvars()
     g_cvMapStatusWebhook = AutoExecConfig_CreateConVar("discrelay_mapstatus_webhook", "", "Webhook for map status (current/previous map) notifications.");
     g_cvListenChatWebhook = AutoExecConfig_CreateConVar("discrelay_listenchat_webhook", "", "Webhook for listening to chat notifications.");
     g_cvListenRCONWebhook = AutoExecConfig_CreateConVar("discrelay_listenrcon_webhook", "", "Webhook for listening to RCON notifications.");
+    //g_cvPlayerStatusWebhook = AutoExecConfig_CreateConVar("discrelay_playerstatus_webhook", "", "Webhook for join/leave/ban notifications.");
 
     g_cvServerHibernationWebhook.GetString(g_sServerHibernationWebhook, sizeof(g_sServerHibernationWebhook));
     g_cvMapStatusWebhook.GetString(g_sMapStatusWebhook, sizeof(g_sMapStatusWebhook));
     g_cvListenChatWebhook.GetString(g_sListenChatWebhook, sizeof(g_sListenChatWebhook));
     g_cvListenRCONWebhook.GetString(g_sListenRCONWebhook, sizeof(g_sListenRCONWebhook));
+    //g_cvPlayerStatusWebhook.GetString(g_sPlayerStatusWebhook, sizeof(g_sPlayerStatusWebhook));
 
     g_cvServerHibernationWebhook.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvMapStatusWebhook.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvListenChatWebhook.AddChangeHook(OnDiscordRelayCvarChanged);
     g_cvListenRCONWebhook.AddChangeHook(OnDiscordRelayCvarChanged);
+    //g_cvPlayerStatusWebhook.AddChangeHook(OnDiscordRelayCvarChanged);
 
     g_cvFilterWords.GetString(g_sFilterWords, sizeof(g_sFilterWords));
+
+    // Embeds
+    g_cvShowServerIP = AutoExecConfig_CreateConVar("discrelay_showserverip", "1", "Display the server IP in Map Status.");
+    g_cvFooterIconURL = AutoExecConfig_CreateConVar("discrelay_footericonurl", "https://raw.githubusercontent.com/Heapons/sp-discordrelay/refs/heads/main/steam.png", "Map Status footer icon.");
 
     AutoExecConfig_CleanFile();
     AutoExecConfig_ExecuteFile();
@@ -245,4 +258,7 @@ public void OnDiscordRelayCvarChanged(ConVar convar, char[] oldValue, char[] new
     g_cvAdminWebhook.GetString(g_sAdminWebhook, sizeof(g_sAdminWebhook));
     g_cvFilterWords.GetString(g_sFilterWords, sizeof(g_sFilterWords));
     g_cvBlockedMessageColor.GetString(g_sBlockedMessageColor, sizeof(g_sBlockedMessageColor));
+    g_cvFooterIconURL.GetString(g_sFooterIconURL, sizeof(g_sFooterIconURL));
+    g_cvShowServerIP.GetString(g_sShowServerIP, sizeof(g_sShowServerIP));
+    //g_cvPlayerStatusWebhook.GetString(g_sPlayerStatusWebhook, sizeof(g_sPlayerStatusWebhook));
 }

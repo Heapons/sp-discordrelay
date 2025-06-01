@@ -18,7 +18,7 @@ enum struct Player
     }
 }
 
-Player g_Players[1000];
+Player g_Players[MAXPLAYERS + 1];
 
 void GetSteamID(int userid)
 {
@@ -30,16 +30,13 @@ void GetSteamID(int userid)
         {
             SteamAPIRequest(userid);
         }
-        else
+        else if (g_cvConnectMessage.BoolValue)
         {
-            if (g_cvConnectMessage.BoolValue)
-            {
-                char phrase[128];
-                char name[64];
-                Format(name, sizeof(name), "%N", client);
-                Format(phrase, sizeof(phrase), "%T", "Player Join", LANG_SERVER, name, g_Players[userid].SteamID64);
-                PrintToDiscord(userid, g_sConnectMessageColor, phrase);
-            }
+            char phrase[128];
+            char playerName[MAX_NAME_LENGTH];
+            Format(playerName, sizeof(playerName), "%N", client);
+            Format(phrase, sizeof(phrase), "%T", "Player Join", LANG_SERVER, playerName, g_Players[userid].SteamID64);
+            PrintToDiscord(userid, g_sConnectMessageColor, phrase);
         }
     }
     else
@@ -80,9 +77,9 @@ stock void SteamResponse_Callback(HTTPResponse response, int userid)
         if (g_cvConnectMessage.BoolValue)
         {
             char phrase[128];
-            char name[64];
-            Format(name, sizeof(name), "%N", client);
-            Format(phrase, sizeof(phrase), "%T", "Player Join", LANG_SERVER, name, g_Players[userid].SteamID64);
+            char playerName[MAX_NAME_LENGTH];
+            Format(playerName, sizeof(playerName), "%N", client);
+            Format(phrase, sizeof(phrase), "%T", "Player Join", LANG_SERVER, playerName, g_Players[userid].SteamID64);
             PrintToDiscord(userid, g_sConnectMessageColor, phrase);
         }
         return;
@@ -103,9 +100,9 @@ stock void SteamResponse_Callback(HTTPResponse response, int userid)
     if (g_cvConnectMessage.BoolValue)
     {
         char phrase[128];
-        char name[64];
-        Format(name, sizeof(name), "%N", client);
-        Format(phrase, sizeof(phrase), "%T", "Player Join", LANG_SERVER, name, g_Players[userid].SteamID64);
+        char playerName[MAX_NAME_LENGTH];
+        Format(playerName, sizeof(playerName), "%N", client);
+        Format(phrase, sizeof(phrase), "%T", "Player Join", LANG_SERVER, playerName, g_Players[userid].SteamID64);
         PrintToDiscord(userid, g_sConnectMessageColor, phrase);
     }
 }
