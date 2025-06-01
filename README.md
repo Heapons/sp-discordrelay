@@ -18,37 +18,27 @@ Download the plugin from [releases](https://github.com/Heapons/sp-discordrelay/r
 
 # Configuration
 ## ConVars
-### General Settings
+### Discord Setup
 | Cvar | Default | Description |
 |------|---------|-------------|
-| `discrelay_steamapikey` || Your Steam API key (needed for `discrelay_servertodiscordavatars`). |
 | `discrelay_discordbottoken` || Your Discord bot token from the [Discord Developer Portal](https://discord.com/developers/applications) (needed for `discrelay_discordtoserver`). |
 | `discrelay_discordwebhook` || Webhook for Discord channel (needed for `discrelay_servertodiscord`). |
 | `discrelay_discordserverid` || Discord Server ID, required for Discord to server. |
 | `discrelay_channelid` || Channel ID for Discord to server (the channel where the plugin checks for messages to send to the server). |
 | `discrelay_rcon_channelid` || Channel ID where RCON commands should be sent. |
 | `discrelay_rcon_webhook` || Webhook for RCON responses (required for `discrelay_rcon_printresponse`). |
-| `discrelay_adminrole` || Role to mention on Discord for `sm_calladmin`. |
-| `discrelay_admin_webhook` || Webhook for admin call notifications. |
-| `discrelay_serverhibernation_webhook` || Webhook for server hibernation notifications. |
-| `discrelay_mapstatus_webhook` || Webhook for map status (current/previous map) notifications. |
-| `discrelay_listenchat_webhook` || Webhook for listening to chat notifications. |
-| `discrelay_listenrcon_webhook` || Webhook for listening to RCON notifications. |
+| `discrelay_serverhibernation_webhook` |  | Webhook for server hibernation notifications. |
+| `discrelay_mapstatus_webhook` |  | Webhook for map status (current/previous map) notifications. |
+| `discrelay_listenchat_webhook` |  | Webhook for listening to chat notifications. |
+| `discrelay_listenrcon_webhook` |  | Webhook for listening to RCON notifications. |
 
-### Feature Switches
+### Plugin Settings
 | Cvar | Default | Description |
 |------|---------|-------------|
 | `discrelay_servertodiscord` | `1` | Enables messages sent in the server to be forwarded to Discord. |
 | `discrelay_discordtoserver` | `1` | Enables messages sent in Discord to be forwarded to the server (`discrelay_discordbottoken` and `discrelay_discordserverid` must be set). |
-| `discrelay_servertodiscordavatars` | `1` | Changes webhook avatar to client's Steam avatar (`discrelay_steamapikey` required). |
-| `discrelay_rcon_enabled` | `0` | Enables RCON functionality. |
-| `discrelay_rcon_printresponse` | `1` | Prints response from command (`discrelay_rcon_webhook` required). |
 | `discrelay_listenannounce` | `1` | Prints a message when the plugin is listening for messages. |
 | `discrelay_serverhibernation` | `1` | Prints a message whenever the server enters/exits hibernation. |
-
-### Message Switches
-| Cvar | Default | Description |
-|------|---------|-------------|
 | `discrelay_servermessage` | `1` | Prints server say commands to Discord (`discrelay_servertodiscord` required). |
 | `discrelay_connectmessage` | `1` | Relays client connection to Discord (`discrelay_servertodiscord` required). |
 | `discrelay_disconnectmessage` | `1` | Relays client disconnection messages to Discord (`discrelay_servertodiscord` required). |
@@ -57,11 +47,34 @@ Download the plugin from [releases](https://github.com/Heapons/sp-discordrelay/r
 | `discrelay_hidecommands` | `!,/` | Hides any message that begins with the specified prefixes (e.g., `!`). Separate multiple prefixes with commas. |
 | `discrelay_showservertags` | `1` | Displays `sv_tags` in server status. |
 | `discrelay_showservername` | `1` | Displays hostname in server status. |
+| `discrelay_showserverip` | `1` | Display the server IP in Map Status. |
+| `discrelay_footericonurl` | `https://raw.githubusercontent.com/Heapons/sp-discordrelay/refs/heads/main/steam.png` | Map Status footer icon. |
+
+### Steam API
+| Cvar | Default | Description |
+|------|---------|-------------|
+| `discrelay_steamapikey` || Your Steam API key (needed for `discrelay_servertodiscordavatars`). |
+| `discrelay_servertodiscordavatars` | `1` | Changes webhook avatar to client's Steam avatar (`discrelay_steamapikey` required). |
 | `discrelay_showsteamid` | `name` | Shows the client's Steam ID. Possible values: `bottom`, `top`, `name`, `prepend`, `append` (or leave blank to hide it). |
+
+### RCON
+| Cvar | Default | Description |
+|------|---------|-------------|
+| `discrelay_rcon_enabled` | `0` | Enables RCON functionality. |
+| `discrelay_rcon_printresponse` | `1` | Prints response from command (`discrelay_rcon_webhook` required). |
+
+### Moderation
+| Cvar | Default | Description |
+|------|---------|-------------|
 | `discrelay_adminrole` || Role to mention on Discord for `sm_calladmin`. |
 | `discrelay_admin_webhook` || Webhook for admin call notifications. |
+| `discrelay_calladmin_cooldown` | `60.0` | Cooldown in seconds for `sm_calladmin` per player.|
+| `discrelay_filter_words` || Filter words through Regex expressions.|
 
-### Colors
+### Embeds
+> [!NOTE]
+> Webhooks default to `discrelay_discordwebhook` when unspecified.
+
 | Cvar | Default | Description |
 |------|---------|-------------|
 | `discrelay_servermessage_color` | `8650AC` | HEX color for console messages. |
@@ -76,9 +89,9 @@ Download the plugin from [releases](https://github.com/Heapons/sp-discordrelay/r
 | `discrelay_previousmap_color` | `DC143C` | HEX color for the previous map message. |
 | `discrelay_rcon_printresponse_color` | `2F4F4F` | HEX color for the RCON response message. |
 | `discrelay_serverstart_color` | `3CB371` | HEX color for the server start message.|
-
-### Moderation
-| Cvar | Default | Description |
-|------|---------|-------------|
-| `discrelay_calladmin_cooldown` | `60.0` | Cooldown in seconds for `sm_calladmin` per player.|
-| `discrelay_filter_words` || Filter words through Regex expressions.|
+| `discrelay_serverhibernation_webhook` |  | Webhook for server hibernation notifications. |
+| `discrelay_mapstatus_webhook` |  | Webhook for map status (current/previous map) notifications. |
+| `discrelay_listenchat_webhook` |  | Webhook for listening to chat notifications. |
+| `discrelay_listenrcon_webhook` |  | Webhook for listening to RCON notifications. |
+| `discrelay_showserverip` | `1` | Display the server IP in Map Status. |
+| `discrelay_footericonurl` | https://raw.githubusercontent.com/Heapons/sp-discordrelay/refs/heads/main/steam.png | Map Status footer icon. |
