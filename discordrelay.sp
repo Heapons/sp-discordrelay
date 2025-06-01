@@ -523,13 +523,13 @@ public void PrintToDiscordMapChange(const char[] map, const char[] color)
         if (g_sFooterIconURL[0])
         {
             DiscordEmbedFooter footer = new DiscordEmbedFooter(ipStr, g_sFooterIconURL);
+            Embed.WithFooter(footer);
         }
         else
         {
             DiscordEmbedFooter footer = new DiscordEmbedFooter(ipStr);
+            Embed.WithFooter(footer);
         }
-
-        Embed.WithFooter(footer);
     }
 
     hook.Embed(Embed);
