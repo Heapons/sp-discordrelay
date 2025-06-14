@@ -9,7 +9,7 @@ Download the plugin from [releases](https://github.com/Heapons/sp-discordrelay/r
 - [SteamWorks](https://github.com/KyleSanderson/SteamWorks/blob/master/Pawn/includes/SteamWorks.inc)
 - [Discord API](https://github.com/Heapons/discord-api-Killstr3ak)
 - [REST in Pawn](https://github.com/ErikMinekus/sm-ripext/tree/main/pawn/scripting/include)
-- [AutoExecConfig](https://github.com/Impact123/AutoExecConfig)
+- [AutoExecConfig](https://github.com/Impact123/AutoExecConfig) (Compile)
 
 > [!NOTE]
 > If you plan to send messages/requests to the server from discord ensure you have Message Intents enabled in the app dashboard.
