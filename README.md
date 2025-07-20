@@ -1,4 +1,5 @@
-# Discord Relay (Also compatible with [Discord Utilities ](https://github.com/Cruze03/Discord-Utilities-v2)‼)
+# This project is discontinued and has been moved to its sequel: [Discord Redux](https://github.com/Serider-Lounge/SRCDS-Discord-Redux)!
+# <s>Discord Relay (Also compatible with [Discord Utilities ](https://github.com/Cruze03/Discord-Utilities-v2)‼)
 Discord ⇄ Server Relay for the Source Engine.
 
 # Installation
@@ -94,4 +95,4 @@ Download the plugin from [releases](https://github.com/Heapons/sp-discordrelay/r
 | `discrelay_listenchat_webhook` |  | Webhook for listening to chat notifications. |
 | `discrelay_listenrcon_webhook` |  | Webhook for listening to RCON notifications. |
 | `discrelay_showserverip` | `1` | Display the server IP in Map Status. |
-| `discrelay_footericonurl` | https://raw.githubusercontent.com/Heapons/sp-discordrelay/refs/heads/main/steam.png | Map Status footer icon. |
+| `discrelay_footericonurl` | https://raw.githubusercontent.com/Heapons/sp-discordrelay/refs/heads/main/steam.png | Map Status footer icon. |</s>
